@@ -1,0 +1,150 @@
+/* ==========================================================================
+   SOLARI MOTOS — Responsive (mobile-first: de menor a mayor)
+   Breakpoints: 600px (tablet chica) · 900px (tablet) · 1100px (desktop) · 1440px
+   ========================================================================== */
+
+/* ---------- ≥ 600px ---------- */
+@media (min-width: 600px) {
+  :root { --gutter: 32px; }
+
+  .hero__actions .btn { flex: 0 0 auto; }
+  .hero__card { left: 22px; right: 22px; bottom: 22px; padding: 18px 20px; }
+  .hero__badge { width: 124px; height: 124px; top: -10px; right: -18px; }
+  .hero__index { display: block; }
+
+  .moto-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  .stats__grid { grid-template-columns: repeat(4, 1fr); }
+  .stat, .stat:nth-child(odd), .stat:nth-child(even) {
+    padding: 44px 24px;
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+  }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { border-right: 0; }
+
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .promo-grid { grid-template-columns: repeat(2, 1fr); }
+  .promo--hot { grid-column: 1 / -1; min-height: 340px; }
+
+  .contact__cards { grid-template-columns: repeat(2, 1fr); }
+
+  .footer__top { grid-template-columns: 2fr 1fr 1fr; }
+
+  .simulator { padding: 32px; }
+}
+
+/* ---------- ≥ 900px ---------- */
+@media (min-width: 900px) {
+  :root { --header-h: 80px; }
+
+  .section { padding: 128px 0; }
+
+  .section-head {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: end;
+    gap: 48px;
+    margin-bottom: 56px;
+  }
+  .section-head--center { grid-template-columns: 1fr; }
+
+  /* Header de escritorio */
+  .nav { display: block; margin-inline: auto; }
+  .nav__list { display: flex; gap: 6px; }
+  .nav__link {
+    position: relative;
+    display: block;
+    padding: 10px 14px;
+    font-size: .92rem;
+    font-weight: 600;
+    color: rgba(242, 238, 230, .78);
+    transition: color .3s;
+  }
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    left: 14px; right: 14px; bottom: 4px;
+    height: 1.5px;
+    background: var(--sun);
+  }
+  .nav__link:hover, .nav__link.is-active { color: var(--text); }
+  .brand { margin-right: 0; }
+  .header__cta { display: inline-flex; }
+  .menu-toggle, .mobile-menu { display: none; }
+
+  /* Hero en dos columnas */
+  .hero { padding-bottom: 36px; }
+  .hero__layout {
+    grid-template-columns: 1.15fr .85fr;
+    align-items: center;
+    gap: 40px;
+  }
+  .hero__title { font-size: clamp(4rem, 7.2vw, 8.2rem); }
+  .hero__media { max-width: none; }
+  .hero__frame { aspect-ratio: 4 / 5; }
+  .hero__sun { right: -12%; top: 6%; width: 64vw; }
+  .hero__outline { font-size: clamp(7rem, 15vw, 15rem); bottom: 22%; }
+
+  .moto-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  /* Primera tarjeta destacada más grande (composición editorial) */
+  .moto-grid--editorial .moto-card:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .moto-grid--editorial .moto-card:first-child .moto-card__media { aspect-ratio: auto; flex: 1; min-height: 360px; }
+  .moto-grid--editorial .moto-card:first-child .moto-card__title { font-size: 3rem; }
+  .moto-grid--editorial .moto-card:first-child .moto-card__body { flex: none; }
+  .moto-grid--editorial .moto-card:first-child .moto-card__cc { font-size: 6rem; }
+
+  .benefits__layout { grid-template-columns: .9fr 1.1fr; gap: 80px; align-items: start; }
+  .benefits__aside { position: sticky; top: calc(var(--header-h) + 32px); }
+  .benefit { grid-template-columns: 80px 1fr; padding: 32px 0; }
+  .benefit h3 { font-size: 2rem; }
+
+  .steps { grid-template-columns: repeat(4, 1fr); }
+
+  .finance__grid { grid-template-columns: 1.15fr .85fr; gap: 28px; align-items: start; }
+  .simulator { padding: 40px; }
+
+  .promo-grid { grid-template-columns: 1.3fr 1fr 1fr; }
+  .promo--hot { grid-column: auto; min-height: 420px; }
+
+  .about__layout { grid-template-columns: 1fr 1fr; gap: 88px; align-items: center; }
+
+  .contact__grid { grid-template-columns: 1fr 1fr; gap: 22px; }
+  .map__frame { min-height: 100%; }
+
+  .cta-final { padding: 140px 0; }
+  .cta-final__inner {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    column-gap: 48px;
+  }
+  .cta-final__title { grid-column: 1 / -1; }
+
+  .wa-float { right: 28px; bottom: 28px; width: 64px; height: 64px; }
+}
+
+/* ---------- ≥ 1100px ---------- */
+@media (min-width: 1100px) {
+  :root { --gutter: 48px; }
+  .nav__list { gap: 10px; }
+  .hero__layout { grid-template-columns: 1.2fr .8fr; }
+  .hero__media { margin-top: 20px; }
+  .hero__badge { width: 140px; height: 140px; left: -60px; right: auto; top: 18%; }
+  .hero__badge-core { width: 70px; height: 70px; font-size: 1.9rem; }
+  .moto-card__body { padding: 24px 24px 26px; }
+  .about__stamp { width: 128px; height: 128px; }
+  .about__stamp strong { font-size: 2.4rem; }
+}
+
+/* ---------- Pantallas bajas en horizontal ---------- */
+@media (max-height: 560px) and (orientation: landscape) {
+  .hero { min-height: auto; }
+}
+
+/* ---------- Impresión ---------- */
+@media print {
+  .site-header, .wa-float, .preloader, .scroll-progress, .marquee, .kinetic, .map { display: none !important; }
+  body { background: #fff; color: #000; }
+}

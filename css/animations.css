@@ -1,0 +1,194 @@
+/* ==========================================================================
+   SOLARI MOTOS — Animaciones
+   Todas las animaciones se desactivan con prefers-reduced-motion (al final).
+   Los estados iniciales ocultos solo aplican cuando JS está activo (.js).
+   ========================================================================== */
+
+/* ---------- Keyframes ---------- */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse {
+  0% { transform: scale(.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes ring {
+  0% { transform: scale(1); opacity: .8; }
+  70%, 100% { transform: scale(1.55); opacity: 0; }
+}
+@keyframes blink { 50% { opacity: .25; } }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+@keyframes scrollCue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(260%); }
+}
+@keyframes sunRise {
+  from { transform: translateY(18%) scale(.7); opacity: 0; }
+  to { transform: none; opacity: .55; }
+}
+@keyframes sunBreath {
+  50% { filter: blur(14px); opacity: .45; }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(40px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cardOut {
+  to { opacity: 0; transform: translateY(-16px) scale(.97); }
+}
+@keyframes preSun {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Preloader ---------- */
+.js .preloader__sun { animation: preSun .9s var(--ease-back) both; }
+.js .preloader__word {
+  clip-path: inset(0 100% 0 0);
+  animation: wordIn .9s var(--ease-out) .15s forwards;
+}
+@keyframes wordIn { to { clip-path: inset(0 0 0 0); } }
+.js .preloader {
+  transition: clip-path 1s var(--ease-in-out), visibility 0s 1s;
+  clip-path: inset(0 0 0 0);
+}
+.js .preloader.is-done {
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+}
+.js .preloader.is-done .preloader__inner {
+  transform: translateY(-40px);
+  opacity: 0;
+  transition: transform .8s var(--ease-in-out), opacity .5s;
+}
+
+/* ---------- Intro del Hero ---------- */
+.js .hero__title .line__inner {
+  transform: translateY(110%) rotate(4deg);
+  transform-origin: 0 100%;
+  transition: transform 1.2s var(--ease-out);
+}
+.js .hero__title .line:nth-child(2) .line__inner { transition-delay: .1s; }
+.js .hero__title .line:nth-child(3) .line__inner { transition-delay: .2s; }
+.js.is-ready .hero__title .line__inner { transform: none; }
+
+.js [data-hero-in] {
+  opacity: 0;
+  translate: 0 24px;
+  transition: opacity .9s var(--ease-out), translate 1s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 90ms + 150ms);
+}
+.js.is-ready [data-hero-in] { opacity: 1; translate: none; }
+
+.js .hero__frame {
+  clip-path: inset(100% 0 0 0 round 200px 200px var(--radius-lg) var(--radius-lg));
+  transition: clip-path 1.4s var(--ease-in-out) .15s, transform .8s var(--ease-out);
+}
+.js.is-ready .hero__frame { clip-path: inset(0 0 0 0 round 200px 200px var(--radius-lg) var(--radius-lg)); }
+.js .hero__img { transform: scale(1.35); }
+.js.is-ready .hero__img { transform: scale(1.08) translate3d(var(--px, 0), var(--py, 0), 0); }
+
+.js .hero__outline {
+  opacity: 0;
+  letter-spacing: .3em;
+  transition: opacity 1.4s var(--ease-out) .7s, letter-spacing 1.6s var(--ease-out) .6s;
+}
+.js.is-ready .hero__outline { opacity: 1; letter-spacing: .02em; }
+
+.js .hero__badge { opacity: 0; transform: scale(.4) rotate(-90deg); transition: opacity .6s .9s, transform 1s var(--ease-back) .9s; }
+.js.is-ready .hero__badge { opacity: 1; transform: none; }
+
+.js.is-ready .hero__sun { animation: sunRise 1.8s var(--ease-out) both, sunBreath 7s ease-in-out 2s infinite; }
+
+/* ---------- Revelado al hacer scroll ---------- */
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 36px;
+  transition:
+    opacity .9s var(--ease-out),
+    translate 1.1s var(--ease-out),
+    clip-path 1.2s var(--ease-in-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.js [data-reveal].is-in { opacity: 1; translate: none; }
+
+/* Títulos: aparecen desde una máscara */
+.js [data-reveal="clip"] {
+  opacity: 1;
+  translate: 0 40px;
+  clip-path: inset(0 0 100% 0);
+}
+.js [data-reveal="clip"].is-in { translate: none; clip-path: inset(-10% -5% -10% -5%); }
+
+/* Imágenes: cortina + zoom */
+.js [data-reveal="scale"] {
+  opacity: 1;
+  translate: none;
+  clip-path: inset(18% 10% 18% 10% round var(--radius-lg));
+}
+.js [data-reveal="scale"] img { scale: 1.3; transition: scale 1.6s var(--ease-out); }
+.js [data-reveal="scale"].is-in { clip-path: inset(0 0 0 0 round var(--radius-lg)); }
+.js [data-reveal="scale"].is-in img { scale: 1; }
+
+.js [data-reveal="fade"] { translate: none; }
+
+/* Tarjetas renderizadas por JS */
+.moto-card.is-entering { animation: cardIn .8s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 80ms); }
+.moto-card.is-leaving { animation: cardOut .3s var(--ease-in-out) both; }
+
+/* Tarjetas de motos/pasos/promos: aparición escalonada */
+.js .reveal-stagger > * {
+  opacity: 0;
+  translate: 0 50px;
+  transition: opacity .9s var(--ease-out), translate 1.1s var(--ease-out), transform .6s var(--ease-out), border-color .4s, box-shadow .6s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 110ms), calc(var(--i, 0) * 110ms), 0s, 0s, 0s;
+}
+.js .reveal-stagger.is-in > * { opacity: 1; translate: none; }
+
+/* ---------- Hover: solo en dispositivos con puntero fino ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover::before { transform: translateY(0); }
+  .btn--primary:hover { color: var(--ink); }
+  .btn--ghost:hover { color: var(--ink); }
+  .btn:hover .icon { transform: translateX(3px); }
+  .btn:active { transform: scale(.97); }
+  .link-arrow:hover { background-size: 0 1.5px; background-position: 100% 100%; gap: 16px; }
+  .link-arrow:hover .icon { transform: translateX(4px); }
+  .link-arrow--up:hover .icon { transform: rotate(-90deg) translateX(4px); }
+
+  .nav__link::after { transform: scaleX(0); transform-origin: 100% 50%; transition: transform .5s var(--ease-out); }
+  .nav__link:hover::after, .nav__link.is-active::after { transform: scaleX(1); transform-origin: 0 50%; }
+
+  .benefit:hover::before { transform: scaleY(1); }
+  .benefit:hover .benefit__num { color: var(--sun); transform: translateX(8px); }
+  .benefit:hover h3 { color: var(--paper); transform: translateX(8px); }
+  .benefit:hover p { color: rgba(242, 238, 230, .7); transform: translateX(8px); }
+}
+
+/* ---------- Movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    transition-delay: 0s !important;
+  }
+  .js [data-reveal],
+  .js [data-hero-in],
+  .js .reveal-stagger > *,
+  .js .hero__title .line__inner,
+  .js .hero__badge,
+  .js .hero__outline {
+    opacity: 1 !important;
+    translate: none !important;
+    clip-path: none !important;
+    letter-spacing: .02em;
+  }
+  .js .hero__frame { clip-path: none !important; }
+  .js .hero__title .line__inner, .js .hero__badge, .js [data-hero-in] { transform: none !important; }
+  .js .hero__img, .js [data-reveal="scale"] img { scale: none !important; }
+  .js .preloader { display: none; }
+  .hero__sun { opacity: .55; }
+  .hero__badge-ring, .scroll-cue__line::after, .pulse-dot::after, .wa-float::before { animation: none !important; }
+  .marquee__track, .kinetic__row { transform: none !important; }
+}
