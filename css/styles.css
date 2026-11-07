@@ -2,7 +2,7 @@
    SOLARI MOTOS — Estilos base (mobile-first)
    Identidad: editorial premium + boutique urbana.
    Paleta: blanco cálido · marfil · piedra · grafito · azul Francia.
-   Tipografías: Archivo expandida (titulares) · Instrument Sans (texto).
+   Tipografías: Dela Gothic One (titulares) · Instrument Sans (texto).
    ========================================================================== */
 
 /* ---------- 1. Tokens ---------- */
@@ -27,10 +27,8 @@
   --line-strong: rgba(31, 30, 28, .32);
   --line-inv: rgba(244, 239, 230, .16);
 
-  /* Titulares: Archivo en ancho expandido. Si se adquiere la licencia de
-     Brekid (Erifqi Zefont), agregar su @font-face (ver README) y ponerla
-     primera en esta lista. */
-  --f-display: 'Archivo', 'Arial Black', system-ui, sans-serif;
+  /* Titulares: Dela Gothic One (un solo peso, muy pesado). */
+  --f-display: 'Dela Gothic One', 'Arial Black', system-ui, sans-serif;
   --wide: 125%;
   --semi: 112%;
   --f-sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -49,6 +47,8 @@
 /* ---------- 2. Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html {
+  /* Evita negritas e itálicas "falsas": Dela Gothic One tiene un solo peso */
+  font-synthesis: none;
   overflow-x: hidden;
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
@@ -776,7 +776,7 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .footer__word {
   display: flex; align-items: center; gap: .08em;
   font-family: var(--f-display); font-weight: 900; font-stretch: var(--wide);
-  font-size: clamp(3.6rem, 20vw, 15.5rem); line-height: .82; letter-spacing: -.02em;
+  font-size: clamp(3rem, 15.5vw, 12.5rem); line-height: .9; letter-spacing: -.02em;
   text-transform: uppercase;
   color: var(--graphite-3);
   user-select: none;
