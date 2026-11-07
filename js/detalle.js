@@ -57,7 +57,7 @@
   /* ---------- Ficha ---------- */
   const thumbs = imgs.length > 1
     ? `<div class="gallery__thumbs" role="group" aria-label="Fotos de la ${esc(name)}">
-        ${imgs.map((src, i) => `<button type="button" data-thumb="${i}" aria-label="Foto ${i + 1}" aria-current="${i === 0}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join('')}
+        ${imgs.map((x, i) => `<button type="button" data-thumb="${i}" aria-label="Foto ${i + 1}" aria-current="${i === 0}"><img class="${S.imgClass(x)}" src="${esc(S.imgSrc(x))}" alt="" loading="lazy"></button>`).join('')}
       </div>`
     : '';
 
@@ -139,12 +139,13 @@
   /* Galería: cambio de foto con fundido */
   const main = $('[data-gallery]', wrap);
   $$('[data-thumb]', wrap).forEach((b) => b.addEventListener('click', () => {
-    const src = imgs[Number(b.dataset.thumb)];
+    const x = imgs[Number(b.dataset.thumb)];
     $$('[data-thumb]', wrap).forEach((x) => x.setAttribute('aria-current', String(x === b)));
     const old = $('img', main);
     const img = new Image();
     img.alt = name;
-    img.src = src;
+    img.className = S.imgClass(x);
+    img.src = S.imgSrc(x);
     S.guard(img);
     if (motionOK()) img.classList.add('is-out');
     main.appendChild(img);

@@ -49,12 +49,18 @@
   }
   const guardAll = (ctx) => $$('img', ctx).forEach(guard);
 
+  /* Fotos: texto (se recorta) u objeto { src, ajuste: 'contener' } (estudio) */
+  const imgSrc = (x) => (x && typeof x === 'object' ? x.src : x) || '';
+  const isStudio = (x) => !!(x && typeof x === 'object' && x.ajuste === 'contener');
+  const imgClass = (x) => (isStudio(x) ? 'img--estudio' : 'img--foto');
+
   /* Foto de una moto, o marcador con el nombre si todavía no hay foto */
   function mediaHTML(m, i = 0, opts = {}) {
-    const src = m.imagenes && m.imagenes[i];
+    const x = m.imagenes && m.imagenes[i];
+    const src = imgSrc(x);
     return `
       <span class="ph" aria-hidden="true"><span class="ph__name">${esc(m.modelo)}</span><span class="ph__brand">${esc(m.marca)}</span></span>
-      ${src ? `<img src="${esc(src)}" alt="${esc(fullName(m))}" ${opts.eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="1200" height="1000">` : ''}`;
+      ${src ? `<img class="${imgClass(x)}" src="${esc(src)}" alt="${esc(fullName(m))}" ${opts.eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" width="1200" height="1000">` : ''}`;
   }
 
   function observe(els, cb, opts = {}) {
@@ -412,7 +418,7 @@
   window.Solari = {
     DATA, CFG, page, $, $$, esc, fmt, pad, clamp, motionOK, finePointer,
     waLink, fullName, motoMsg, refTag, hasPrice, priceText, detailURL, link,
-    STATUS, statusHTML, guard, guardAll, mediaHTML, observe, reveal, brandList,
+    STATUS, statusHTML, guard, guardAll, mediaHTML, imgSrc, imgClass, observe, reveal, brandList,
     motoCard, renderHelmets, splitWords,
     /* Llamar al final de cada página, después de renderizar su contenido */
     boot() {

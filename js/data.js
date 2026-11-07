@@ -9,12 +9,11 @@
    - Precios: valores de referencia para evaluar el diseño (config.demo).
    - Financiación y promociones: textos genéricos. Reemplazar por las
      condiciones REALES que defina el negocio antes de publicar.
-   - Fotos: todavía no hay fotos de los modelos. Mientras `imagenes` esté
-     vacío se muestra un marcador con el nombre del modelo.
-     Para cargar fotos: guardarlas en /assets/images/motos/ y listar las
-     rutas, ej.: imagenes: ['assets/images/motos/honda-xr-150l-1.webp']
-     (la primera es la principal). Usar fotos propias o el material oficial
-     que entregue cada marca a sus concesionarios.
+   - Fotos de motos: material oficial publicado por cada marca (Honda
+     Motos Argentina, Zanella, Corven y Guerrero), guardado en
+     /assets/images/motos/<id>/. Confirmar con cada distribuidor el uso
+     comercial de las imágenes, o reemplazarlas por fotos propias.
+     Si `imagenes` está vacío se muestra un marcador con el nombre.
    ========================================================================== */
 
 (function () {
@@ -52,20 +51,36 @@
       instagram: 'https://instagram.com/',
       facebook: 'https://facebook.com/'
     },
-    mensajeWhatsApp: 'Hola Solari Motos, quiero hacer una consulta.'
+    mensajeWhatsApp: 'Hola Solari Motos, quiero hacer una consulta.',
+    // Foto vertical del inicio (opcional). Si falta, se usa la principal de la primera moto.
+    heroImagen: 'assets/images/motos/honda-xr-150l/hero.webp'
   };
 
   /* ---------- Motos ----------
      disponibilidad: 'disponible' | 'ultima' | 'pedido' | 'reservada'
      precio: número (contado) o null para mostrar "Consultar precio".
-     imagenes: la primera es la principal. */
+     imagenes: la primera es la principal. Cada foto puede ser:
+       - un texto con la ruta → se recorta para llenar el espacio (fotos de
+         ambiente y detalles);
+       - estudio('ruta') → se muestra entera sobre fondo blanco (fotos de
+         producto con fondo blanco o transparente).
+     Fotos actuales: material oficial publicado por cada marca. */
+  const dir = (id) => (n) => `assets/images/motos/${id}/${n}.webp`;
+  const estudio = (src) => ({ src, ajuste: 'contener' });
+
+  const xr = dir('honda-xr-150l');
+  const wave = dir('honda-wave-110-s');
+  const zb = dir('zanella-zb-110');
+  const energy = dir('corven-energy-110');
+  const trip = dir('guerrero-trip-110');
+
   const motos = [
     {
       id: 'honda-xr-150l',
       marca: 'Honda', modelo: 'XR 150L', categoria: 'Trail',
       cilindrada: 149, anio: 2026, precio: 4350000,
       disponibilidad: 'disponible', etiqueta: 'Para todo camino',
-      imagenes: [],
+      imagenes: [estudio(xr('01')), xr('02'), xr('03'), xr('04'), xr('05')],
       resumen: 'Robusta y simple de mantener. Va igual de bien en el asfalto del centro que en el camino de tierra.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Ciudad, ruta y tierra'], ['Garantía', 'Oficial de fábrica']]
@@ -75,37 +90,37 @@
       marca: 'Honda', modelo: 'Wave 110 S', categoria: 'Calle',
       cilindrada: 109, anio: 2026, precio: 2650000,
       disponibilidad: 'disponible', etiqueta: 'La de todos los días',
-      imagenes: [],
+      imagenes: [estudio(wave('01')), estudio(wave('02')), wave('03')],
       resumen: 'Económica, liviana y confiable. La compañera ideal para ir al trabajo, al colegio o hacer mandados.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
     },
     {
       id: 'zanella-zb-110',
-      marca: 'Zanella', modelo: 'ZB 110', categoria: 'Calle',
+      marca: 'Zanella', modelo: 'ZB 110 ST', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1890000,
       disponibilidad: 'ultima', etiqueta: '',
-      imagenes: [],
+      imagenes: [estudio(zb('01')), estudio(zb('02')), estudio(zb('03')), estudio(zb('04')), zb('05'), zb('06'), zb('07')],
       resumen: 'Práctica y accesible, pensada para moverse por la ciudad gastando poco.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
     },
     {
       id: 'corven-energy-110',
-      marca: 'Corven', modelo: 'Energy 110', categoria: 'Calle',
+      marca: 'Corven', modelo: 'Energy 110 RT', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1790000,
       disponibilidad: 'disponible', etiqueta: '',
-      imagenes: [],
+      imagenes: [estudio(energy('01')), estudio(energy('02')), energy('03'), energy('04')],
       resumen: 'Una opción económica y rendidora para dar el primer paso a tu propia moto.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
     },
     {
       id: 'guerrero-trip-110',
-      marca: 'Guerrero', modelo: 'Trip 110', categoria: 'Calle',
+      marca: 'Guerrero', modelo: 'Trip 110 Full', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1750000,
       disponibilidad: 'pedido', etiqueta: '',
-      imagenes: [],
+      imagenes: [estudio(trip('01')), trip('02'), trip('03'), trip('04'), trip('05'), trip('06')],
       resumen: 'Sencilla y resistente. Ideal para el uso diario con un costo de mantenimiento bajo.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]

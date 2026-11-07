@@ -15,7 +15,9 @@
     const m = DATA.motos[0];
     const photo = $('[data-hero-photo]');
     if (!m || !photo) return;
-    photo.innerHTML = S.mediaHTML(m, 0, { eager: true });
+    photo.innerHTML = CFG.heroImagen
+      ? `<span class="ph" aria-hidden="true"></span><img class="img--foto" src="${esc(CFG.heroImagen)}" alt="${esc(S.fullName(m))}" fetchpriority="high" decoding="async" width="600" height="1300">`
+      : S.mediaHTML(m, 0, { eager: true });
     S.guardAll(photo);
     $('[data-hero-status]').outerHTML = S.statusHTML(m.disponibilidad);
     $('[data-hero-name]').textContent = S.fullName(m);

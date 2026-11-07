@@ -63,5 +63,5 @@ python3 -m http.server 8000
 - **Financiación:** textos genéricos a validar. `coeficientes` en `null` no muestra montos estimados; solo cargar valores reales.
 - **Promociones:** arreglo vacío oculta el bloque. `demo: true` muestra la marca "Ejemplo".
 - **Contacto:** WhatsApp, dirección, localidad, horarios y redes en `config` (hoy son provisorios).
-- **Fotos de motos:** guardarlas en `assets/images/motos/` y listarlas en `imagenes`. Sin fotos se muestra un marcador con el nombre del modelo.
+- **Fotos de motos:** hoy son el material oficial que publica cada marca (Honda Motos Argentina, Zanella, Corven y Guerrero), optimizado en WebP dentro de `assets/images/motos/<id>/`. Conviene confirmar con cada distribuidor el uso comercial, o reemplazarlas por fotos propias. En `imagenes`, `estudio('ruta')` muestra la foto entera sobre blanco; una ruta simple la recorta para llenar el marco. Sin fotos se muestra un marcador con el nombre del modelo.
 - **Ficha de cada moto:** `detalle.html?moto=<id>`. Los enlaces viejos `index.html#moto-<id>` redirigen solos.
