@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none" stroke="#1f1e1c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Ilustración de motocicleta">
   <circle cx="92" cy="170" r="50" stroke-opacity=".55"/>
   <circle cx="92" cy="170" r="34" stroke-opacity=".18"/>
-  <circle cx="92" cy="170" r="5" fill="#d24a1e" stroke="none"/>
+  <circle cx="92" cy="170" r="5" fill="#1b4db8" stroke="none"/>
   <circle cx="312" cy="170" r="50" stroke-opacity=".55"/>
   <circle cx="312" cy="170" r="34" stroke-opacity=".18"/>
-  <circle cx="312" cy="170" r="5" fill="#d24a1e" stroke="none"/>
+  <circle cx="312" cy="170" r="5" fill="#1b4db8" stroke="none"/>
   <g stroke-opacity=".5">
     <path d="M92 170 L178 148"/>
     <path d="M312 170 L268 82"/>
@@ -16,5 +16,5 @@
     <path d="M168 182 L96 156"/>
     <path d="M216 150 L262 106"/>
   </g>
-  <path d="M168 106 C188 88 236 86 252 96 L244 124 C222 128 192 128 176 126 Z" stroke="#d24a1e"/>
+  <path d="M168 106 C188 88 236 86 252 96 L244 124 C222 128 192 128 176 126 Z" stroke="#1b4db8"/>
 </svg>

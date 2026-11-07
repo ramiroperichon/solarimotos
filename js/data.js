@@ -9,16 +9,16 @@
    - Precios: valores de referencia para evaluar el diseño (config.demo).
    - Financiación y promociones: textos genéricos. Reemplazar por las
      condiciones REALES que defina el negocio antes de publicar.
-   - Fotos de motos: imágenes de referencia (Unsplash). Reemplazar por fotos
-     propias en /assets/images/ cuando estén disponibles.
-   - Cascos y local: sin fotos todavía → se muestran espacios preparados.
+   - Fotos: todavía no hay fotos de los modelos. Mientras `imagenes` esté
+     vacío se muestra un marcador con el nombre del modelo.
+     Para cargar fotos: guardarlas en /assets/images/motos/ y listar las
+     rutas, ej.: imagenes: ['assets/images/motos/honda-xr-150l-1.webp']
+     (la primera es la principal). Usar fotos propias o el material oficial
+     que entregue cada marca a sus concesionarios.
    ========================================================================== */
 
 (function () {
   'use strict';
-
-  const img = (id, w = 1400) =>
-    `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=74`;
 
   const config = {
     nombre: 'Solari Motos',
@@ -65,7 +65,7 @@
       marca: 'Honda', modelo: 'XR 150L', categoria: 'Trail',
       cilindrada: 149, anio: 2026, precio: 4350000,
       disponibilidad: 'disponible', etiqueta: 'Para todo camino',
-      imagenes: [img('photo-1558981806-ec527fa84c39'), img('photo-1449426468159-d96dbf08f19f'), img('photo-1525160354320-d8e92641c563')],
+      imagenes: [],
       resumen: 'Robusta y simple de mantener. Va igual de bien en el asfalto del centro que en el camino de tierra.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Ciudad, ruta y tierra'], ['Garantía', 'Oficial de fábrica']]
@@ -75,7 +75,7 @@
       marca: 'Honda', modelo: 'Wave 110 S', categoria: 'Calle',
       cilindrada: 109, anio: 2026, precio: 2650000,
       disponibilidad: 'disponible', etiqueta: 'La de todos los días',
-      imagenes: [img('photo-1609630875171-b1321377ee65'), img('photo-1558981403-c5f9899a28bc')],
+      imagenes: [],
       resumen: 'Económica, liviana y confiable. La compañera ideal para ir al trabajo, al colegio o hacer mandados.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
@@ -85,7 +85,7 @@
       marca: 'Zanella', modelo: 'ZB 110', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1890000,
       disponibilidad: 'ultima', etiqueta: '',
-      imagenes: [img('photo-1568772585407-9361f9bf3a87'), img('photo-1580310614729-ccd69652491d')],
+      imagenes: [],
       resumen: 'Práctica y accesible, pensada para moverse por la ciudad gastando poco.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
@@ -95,7 +95,7 @@
       marca: 'Corven', modelo: 'Energy 110', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1790000,
       disponibilidad: 'disponible', etiqueta: '',
-      imagenes: [img('photo-1622185135505-2d795003994a'), img('photo-1558980664-769d59546b3d')],
+      imagenes: [],
       resumen: 'Una opción económica y rendidora para dar el primer paso a tu propia moto.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
@@ -105,7 +105,7 @@
       marca: 'Guerrero', modelo: 'Trip 110', categoria: 'Calle',
       cilindrada: 107, anio: 2026, precio: 1750000,
       disponibilidad: 'pedido', etiqueta: '',
-      imagenes: [img('photo-1547549082-6bc09f2049ae'), img('photo-1591637333184-19aa84b3e01f')],
+      imagenes: [],
       resumen: 'Sencilla y resistente. Ideal para el uso diario con un costo de mantenimiento bajo.',
       financiacion: 'Con alternativas de financiación',
       ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]

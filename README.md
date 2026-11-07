@@ -6,22 +6,44 @@ Sitio estático (HTML5 + CSS3 + JavaScript puro). No requiere compilación: se a
 ## Identidad visual
 
 - **Dirección:** editorial premium + boutique urbana, sobre fondos claros.
-- **Paleta:** blanco cálido `#fcfaf6` · marfil `#f4efe6` · piedra `#e7e2d9` · grafito `#1f1e1c` · acento arcilla `#d24a1e`.
-- **Tipografías:** Bricolage Grotesque (titulares, ancho condensado) · Instrument Sans (textos).
+- **Paleta:** blanco cálido `#fcfaf6` · marfil `#f4efe6` · piedra `#e7e2d9` · grafito `#1f1e1c` · azul Francia `#1b4db8`.
+- **Tipografías:** Archivo en ancho expandido (titulares) · Instrument Sans (textos).
+
+### Usar Brekid (tipografía comercial)
+
+Brekid es una fuente paga de Erifqi Zefont. Si se compra la licencia con uso web:
+
+1. Copiar los archivos `.woff2` a `assets/fonts/`.
+2. Agregar al inicio de `css/styles.css`:
+   ```css
+   @font-face {
+     font-family: 'Brekid';
+     src: url('../assets/fonts/Brekid.woff2') format('woff2');
+     font-display: swap;
+   }
+   ```
+3. En `:root`, cambiar `--f-display` a `'Brekid', 'Archivo', 'Arial Black', sans-serif;`.
+
+Recomendación: usarla solo en titulares grandes (hero, títulos de sección, logo) y dejar Archivo para modelos, precios y botones.
 - **Marca:** sol con dos cortes horizontales + palabra "Solari".
 
 ## Estructura
 
 ```
 /
-├── index.html            Página principal (hero, marcas, colección, financiación, cascos, nosotros, contacto)
+├── index.html            Inicio (hero, marcas, colección, financiación, cascos, nosotros, contacto)
+├── catalogo.html         Catálogo con filtros (marca, categoría, cilindrada, precio, disponibilidad) y cascos
+├── detalle.html          Ficha de cada moto: detalle.html?moto=<id>
 ├── css/
 │   ├── styles.css        Tokens y componentes (mobile-first)
 │   ├── animations.css    Entradas, revelados al scroll, hover, prefers-reduced-motion
 │   └── responsive.css    Breakpoints 640 / 900 / 1200 px
 ├── js/
 │   ├── data.js           ÚNICA fuente de contenido
-│   └── main.js           Render y comportamiento
+│   ├── common.js         Encabezado, menú, pie, tarjetas y utilidades compartidas
+│   ├── main.js           Inicio
+│   ├── catalogo.js       Filtros, orden y resultados (el estado queda en la URL)
+│   └── detalle.js        Ficha de moto
 └── assets/
     ├── images/           Ilustraciones de respaldo (moto y casco)
     └── icons/            favicon.svg
@@ -41,4 +63,5 @@ python3 -m http.server 8000
 - **Financiación:** textos genéricos a validar. `coeficientes` en `null` no muestra montos estimados; solo cargar valores reales.
 - **Promociones:** arreglo vacío oculta el bloque. `demo: true` muestra la marca "Ejemplo".
 - **Contacto:** WhatsApp, dirección, localidad, horarios y redes en `config` (hoy son provisorios).
-- **Ficha de cada moto:** se abre en un panel; también por enlace directo `index.html#moto-<id>`.
+- **Fotos de motos:** guardarlas en `assets/images/motos/` y listarlas en `imagenes`. Sin fotos se muestra un marcador con el nombre del modelo.
+- **Ficha de cada moto:** `detalle.html?moto=<id>`. Los enlaces viejos `index.html#moto-<id>` redirigen solos.

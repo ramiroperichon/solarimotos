@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Catálogo de motos 0km y cascos — Solari Motos</title>
+  <meta name="description" content="Catálogo de Solari Motos: Honda, Zanella, Corven y Guerrero. Precios de contado, financiación y cascos. Consultá por WhatsApp.">
+  <meta name="theme-color" content="#fcfaf6">
+  <link rel="canonical" href="https://www.solarimotos.com.ar/catalogo.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="Catálogo — Solari Motos">
+  <meta property="og:description" content="Motos 0km y cascos con alternativas de financiación.">
+
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,300..900&family=Instrument+Sans:wdth,wght@85..100,400..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body data-page="catalogo">
+  <div data-slot="header"></div>
+
+  <main id="main">
+
+    <!-- ============ ENCABEZADO DEL CATÁLOGO ============ -->
+    <section class="page-head" aria-labelledby="cat-title">
+      <div class="container page-head__grid">
+        <nav class="crumbs" aria-label="Ruta de navegación" data-in style="--d:0">
+          <a href="index.html">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">Catálogo</span>
+        </nav>
+        <h1 class="page-head__title" id="cat-title">
+          <span class="ln"><span class="ln__in">Catálogo<span class="dot">.</span></span></span>
+        </h1>
+        <div class="page-head__side" data-in style="--d:3">
+          <p class="page-head__lead">
+            Todas las motos que tenemos hoy, con precio de contado y alternativas
+            de financiación. ¿Buscás un modelo que no está? Lo conseguimos a pedido.
+          </p>
+          <p class="page-head__stats">
+            <span><strong data-stat-total></strong> modelos</span>
+            <span><strong data-stat-brands></strong> marcas</span>
+            <span><strong data-stat-available></strong> disponibles hoy</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FILTROS + RESULTADOS ============ -->
+    <section class="catalog" aria-label="Motos">
+      <div class="catalog__bar" data-catalog-bar>
+        <div class="container catalog__bar-inner">
+          <div class="chips-filter catalog__brands" role="group" aria-label="Marca" data-f-brands></div>
+          <div class="catalog__tools">
+            <button class="tool-btn" type="button" aria-expanded="false" aria-controls="filters" data-f-toggle>
+              <svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>
+              <span>Filtros</span><span class="tool-btn__count" data-f-count hidden></span>
+            </button>
+            <label class="sort">
+              <span class="visually-hidden">Ordenar por</span>
+              <select data-f-sort>
+                <option value="destacadas">Destacadas</option>
+                <option value="precio-asc">Menor precio</option>
+                <option value="precio-desc">Mayor precio</option>
+                <option value="cc-asc">Menor cilindrada</option>
+                <option value="cc-desc">Mayor cilindrada</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="filters" id="filters" data-filters hidden>
+          <div class="container filters__grid">
+            <fieldset class="filters__group">
+              <legend>Categoría</legend>
+              <div class="filters__opts" data-f-cats></div>
+            </fieldset>
+            <fieldset class="filters__group">
+              <legend>Cilindrada</legend>
+              <div class="filters__opts" data-f-cc></div>
+            </fieldset>
+            <fieldset class="filters__group">
+              <legend>Precio de contado</legend>
+              <div class="range">
+                <div class="range__row"><span>Hasta</span><output data-f-price-out></output></div>
+                <input type="range" data-f-price aria-label="Precio máximo">
+              </div>
+            </fieldset>
+            <fieldset class="filters__group">
+              <legend>Disponibilidad</legend>
+              <label class="switch">
+                <input type="checkbox" data-f-available>
+                <span class="switch__track" aria-hidden="true"></span>
+                <span>Solo disponibles hoy</span>
+              </label>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="catalog__status">
+          <p class="catalog__count" aria-live="polite"><strong data-r-count></strong> <span data-r-label></span></p>
+          <div class="active-tags" data-active-tags></div>
+        </div>
+
+        <div class="catalog__grid" data-results></div>
+
+        <div class="catalog__empty" data-empty hidden>
+          <p class="catalog__empty-title">No encontramos motos con esos filtros.</p>
+          <p>Probá con otra combinación o consultanos: podemos conseguir el modelo que buscás.</p>
+          <div class="catalog__empty-actions">
+            <button class="btn btn--line" type="button" data-f-reset>Limpiar filtros</button>
+            <a class="btn btn--dark" href="#" data-wa target="_blank" rel="noopener">
+              <svg class="icon icon--wa" aria-hidden="true"><use href="#i-wa"/></svg><span>Consultar por otro modelo</span>
+            </a>
+          </div>
+        </div>
+
+        <p class="collection__note" data-demo-note hidden>
+          Precios de referencia, sujetos a cambios. Confirmá el valor final por WhatsApp o en el local.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ A PEDIDO ============ -->
+    <section class="order-band" aria-labelledby="order-title">
+      <div class="container order-band__inner">
+        <h2 class="order-band__title" id="order-title" data-split>¿No está la que buscás? <em>La pedimos por vos.</em></h2>
+        <div class="order-band__side" data-reveal>
+          <p>Trabajamos con un inventario chico, pero podemos gestionar otros modelos de las marcas que comercializamos.</p>
+          <a class="btn btn--light btn--lg" href="#" data-wa target="_blank" rel="noopener" data-magnetic>
+            <svg class="icon icon--wa" aria-hidden="true"><use href="#i-wa"/></svg><span>Pedir un modelo</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CASCOS ============ -->
+    <section class="section helmets" id="cascos" aria-labelledby="cascos-title">
+      <div class="container">
+        <header class="head head--split">
+          <div>
+            <p class="label" data-reveal><span class="label__n">+</span> Cascos</p>
+            <h2 class="title" id="cascos-title" data-split>Rodá <em>seguro.</em></h2>
+          </div>
+          <p class="head__intro" data-reveal style="--i:2">
+            El casco es parte de la moto. Consultá modelos, talles y colores disponibles.
+          </p>
+        </header>
+        <div class="helmets__rail" data-helmets></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-slot="footer"></div>
+
+  <script src="js/data.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/catalogo.js" defer></script>
+</body>
+</html>

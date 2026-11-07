@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ficha de la moto — Solari Motos</title>
+  <meta name="description" content="Ficha de la moto: fotos, precio de contado, alternativas de financiación y consulta por WhatsApp.">
+  <meta name="theme-color" content="#fcfaf6">
+  <meta property="og:type" content="product">
+  <meta property="og:locale" content="es_AR">
+
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,300..900&family=Instrument+Sans:wdth,wght@85..100,400..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body data-page="detalle">
+  <div data-slot="header"></div>
+
+  <main id="main">
+    <!-- El contenido se genera desde js/data.js según ?moto=<id> -->
+    <section class="product" data-product aria-live="polite"></section>
+
+    <section class="section steps-band" aria-labelledby="steps-title">
+      <div class="container">
+        <header class="head head--split">
+          <div>
+            <p class="label" data-reveal><span class="label__n">→</span> Cómo comprarla</p>
+            <h2 class="title" id="steps-title" data-split>Tres pasos, <em>sin vueltas.</em></h2>
+          </div>
+          <p class="head__intro" data-reveal style="--i:2">
+            Te acompañamos desde la primera consulta hasta que salís andando.
+          </p>
+        </header>
+        <ol class="steps">
+          <li class="step" data-reveal>
+            <span class="step__n">01</span>
+            <h3>Consultanos</h3>
+            <p>Escribinos por WhatsApp o vení al local. Confirmamos disponibilidad, colores y precio actualizado.</p>
+          </li>
+          <li class="step" data-reveal style="--i:1">
+            <span class="step__n">02</span>
+            <h3>Elegí cómo pagar</h3>
+            <p>Contado, tarjeta o financiación. Te explicamos cada alternativa y los requisitos antes de decidir.</p>
+          </li>
+          <li class="step" data-reveal style="--i:2">
+            <span class="step__n">03</span>
+            <h3>Retirá tu moto</h3>
+            <p>Gestionamos la documentación y el patentamiento para que la retires lista para usar.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section related" aria-labelledby="related-title" data-related-wrap>
+      <div class="container">
+        <header class="head head--row">
+          <h2 class="title title--sm" id="related-title" data-split>También te <em>puede interesar</em></h2>
+          <a class="link-arrow" href="catalogo.html">Ver todo el catálogo <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </header>
+        <div class="catalog__grid" data-related></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-slot="footer"></div>
+
+  <script src="js/data.js" defer></script>
+  <script src="js/common.js" defer></script>
+  <script src="js/detalle.js" defer></script>
+</body>
+</html>
