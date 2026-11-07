@@ -1,6 +1,6 @@
 /* ==========================================================================
-   SOLARI MOTOS — Lógica de la página principal
-   JavaScript puro, sin dependencias.
+   SOLARI MOTOS — Lógica del sitio
+   JavaScript puro, sin dependencias. Todo el contenido sale de js/data.js.
    ========================================================================== */
 
 (function () {
@@ -20,587 +20,621 @@
   /* ---------- Utilidades ---------- */
   const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
   const fmt = (n) => money.format(Math.round(n)).replace(/\s/g, ' ');
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-  const escapeHTML = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const waLink = (msg = CFG.mensajeWhatsApp) =>
-    `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
+  const waLink = (msg = CFG.mensajeWhatsApp) => `https://wa.me/${CFG.whatsapp}?text=${encodeURIComponent(msg)}`;
+  const fullName = (m) => `${m.marca} ${m.modelo}`;
+  const motoMsg = (m) => `Hola ${CFG.nombre}, me interesa la ${fullName(m)} (${m.cilindrada} cc). ¿Está disponible? ¿Qué alternativas de financiación tienen?`;
+  const refTag = () => (CFG.demo ? '<span class="ref">Referencia</span>' : '');
+  const priceText = (p) => (typeof p === 'number' ? fmt(p) : 'Consultar precio');
 
-  const motoMessage = (m) =>
-    `Hola ${CFG.nombre}, quiero consultar por la ${m.marca} ${m.modelo} (${m.cilindrada} cc, ${m.anio}). ¿Está disponible y qué planes de financiación tienen?`;
+  const STATUS = { disponible: 'Disponible', ultima: 'Última unidad', pedido: 'A pedido', reservada: 'Reservada' };
+  const statusHTML = (s) => `<span class="status status--${esc(s)}">${esc(STATUS[s] || s)}</span>`;
 
-  const STATUS = {
-    disponible: 'Disponible',
-    ultimas: 'Últimas unidades',
-    pedido: 'A pedido',
-    reservada: 'Reservada'
-  };
-
-  /* Imágenes: si una foto no carga, se muestra la ilustración de respaldo */
-  function guardImage(img) {
+  /* Si una foto no carga, se oculta y queda la ilustración de fondo */
+  function guard(img) {
     const fail = () => img.classList.add('is-broken');
     img.addEventListener('error', fail, { once: true });
     if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) fail();
   }
 
-  /* ---------- Contenido dinámico ---------- */
-  function fillContactInfo() {
+  function observe(els, cb, opts = {}) {
+    const list = Array.isArray(els) ? els : [els];
+    if (!('IntersectionObserver' in window) || !motionOK()) { list.forEach(cb); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { cb(en.target); io.unobserve(en.target); } });
+    }, { threshold: opts.threshold ?? 0.12, rootMargin: opts.rootMargin ?? '0px 0px -8% 0px' });
+    list.forEach((el) => el && io.observe(el));
+  }
+  const reveal = (els, opts) => observe(els, (el) => el.classList.add('is-in'), opts);
+
+  /* ---------- Datos fijos (contacto, lugar, horarios) ---------- */
+  function schedule() {
+    const now = new Date();
+    const day = now.getDay();
+    const mins = now.getHours() * 60 + now.getMinutes();
+    const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const ranges = CFG.horarios[day] || [];
+    const open = ranges.some(([a, b]) => mins >= toMin(a) && mins < toMin(b));
+    const today = ranges.length ? ranges.map(([a, b]) => `${a}–${b}`).join(' · ') : 'cerrado';
+    const group = day === 0 ? 2 : day === 6 ? 1 : 0;
+    return { open, today, group };
+  }
+
+  function fillStatic() {
+    const place = `${CFG.localidad}, ${CFG.provincia}`;
     $$('[data-wa]').forEach((a) => { a.href = waLink(); });
     $$('[data-wa-visible]').forEach((el) => { el.textContent = CFG.whatsappVisible; });
-    $$('[data-address]').forEach((el) => { el.textContent = `${CFG.direccion}, ${CFG.localidad}`; });
+    $$('[data-address]').forEach((el) => { el.textContent = CFG.direccion; });
+    $$('[data-place]').forEach((el) => { el.textContent = place; });
+    $$('[data-place-short]').forEach((el) => { el.textContent = CFG.localidad; });
+    $$('[data-province]').forEach((el) => { el.textContent = CFG.provincia; });
     $$('[data-phone]').forEach((a) => { a.href = `tel:${CFG.telefono.replace(/[^\d+]/g, '')}`; });
-    $$('[data-email]').forEach((a) => { a.href = `mailto:${CFG.email}`; });
-    $$('[data-email-text]').forEach((a) => { a.textContent = CFG.email; });
+    $$('[data-phone-text]').forEach((a) => { a.textContent = CFG.telefono; });
     $$('[data-social]').forEach((a) => { a.href = CFG.redes[a.dataset.social] || '#'; });
     $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
+    $$('[data-count-motos]').forEach((el) => { el.textContent = `${DATA.motos.length} ${DATA.motos.length === 1 ? 'moto' : 'motos'}`; });
+    const note = $('[data-demo-note]');
+    if (note) note.hidden = !CFG.demo;
 
-    $$('[data-src-key]').forEach((img) => {
-      const src = DATA.photos[img.dataset.srcKey] || (img.dataset.srcKey === 'shop' ? DATA.nosotros.fotos[0] : '');
-      if (src) { guardImage(img); img.src = src; }
+    const s = schedule();
+    $$('[data-open-status]').forEach((el) => {
+      el.hidden = false;
+      el.textContent = s.open ? 'Abierto ahora' : 'Cerrado ahora';
+      el.classList.toggle('is-open', s.open);
     });
+    $$('[data-today-hours]').forEach((el) => { el.textContent = `Hoy: ${s.today}`; });
+    const dl = $('[data-hours]');
+    if (dl) dl.innerHTML = CFG.horariosTexto.map(([d, h], i) => `<div class="${i === s.group ? 'is-today' : ''}"><dt>${esc(d)}</dt><dd>${esc(h)}</dd></div>`).join('');
+    const fh = $('[data-footer-hours]');
+    if (fh) fh.innerHTML = CFG.horariosTexto.map(([d, h]) => `<li>${esc(d)}<br><span style="opacity:.6">${esc(h)}</span></li>`).join('');
   }
 
-  function fillHero() {
-    const m = DATA.motos.find((x) => x.destacada) || DATA.motos[0];
+  /* ---------- Titulares divididos en palabras ---------- */
+  function splitWords() {
+    $$('[data-split]').forEach((el) => {
+      let wi = 0;
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach((node) => {
+        const parts = node.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        parts.forEach((p) => {
+          if (!p) return;
+          if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(' ')); return; }
+          const w = document.createElement('span');
+          w.className = 'w';
+          w.innerHTML = `<span class="w__in" style="--wi:${wi++}">${esc(p)}</span>`;
+          frag.appendChild(w);
+        });
+        node.parentNode.replaceChild(frag, node);
+      });
+    });
+    reveal($$('[data-split]'), { threshold: 0.2 });
+  }
+
+  /* ---------- Hero ---------- */
+  function initHero() {
+    const m = DATA.motos[0];
+    if (!m) return;
     const img = $('[data-hero-img]');
-    if (img && m) {
-      guardImage(img);
-      img.src = m.imagenes[0];
-      img.alt = `${m.marca} ${m.modelo}`;
-      $('[data-hero-model]').textContent = `${m.marca} ${m.modelo}`;
-      $('[data-hero-specs]').textContent = `${m.cilindrada} cc · ${m.anio} · ${m.categoria}`;
-      $('[data-hero-price]').textContent = fmt(m.precio);
+    guard(img);
+    img.src = m.imagenes[0] || '';
+    img.alt = fullName(m);
+    $('[data-hero-status]').outerHTML = statusHTML(m.disponibilidad);
+    $('[data-hero-name]').textContent = fullName(m);
+    $('[data-hero-meta]').textContent = `${m.cilindrada} cc · ${typeof m.precio === 'number' ? `Contado ${fmt(m.precio)}` : 'Consultar precio'}`;
+    $('[data-hero-open]').addEventListener('click', () => Sheet.open(m.id));
+  }
+
+  /* ---------- Marcas (se generan desde el inventario) ---------- */
+  function brandList() {
+    const map = new Map();
+    DATA.motos.forEach((m) => map.set(m.marca, (map.get(m.marca) || 0) + 1));
+    return Array.from(map, ([marca, n]) => ({ marca, n }));
+  }
+
+  function initBrands() {
+    const ul = $('[data-brands]');
+    if (!ul) return;
+    ul.innerHTML = brandList().map((b, i) => `
+      <li class="brand-item" style="--i:${i}">
+        <button type="button" data-brand="${esc(b.marca)}" aria-label="Ver motos ${esc(b.marca)}">
+          <span class="brand-item__name">${esc(b.marca)}</span>
+          <span class="brand-item__count">${pad(b.n)} ${b.n === 1 ? 'modelo' : 'modelos'}</span>
+        </button>
+      </li>`).join('');
+    ul.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-brand]');
+      if (!b) return;
+      Collection.filter(b.dataset.brand);
+      $('#coleccion').scrollIntoView({ behavior: motionOK() ? 'smooth' : 'auto' });
+    });
+    reveal($('.brands'), { threshold: 0.2 });
+  }
+
+  /* ---------- Colección ---------- */
+  /* Asigna tamaños editoriales distintos según la posición y la cantidad. */
+  function layoutSizes(n) {
+    if (n === 1) return ['wide'];
+    const sizes = ['xl', 'md'];
+    let rest = n - 2;
+    while (rest > 0) {
+      if (rest >= 3) { sizes.push('sm', 'sm', 'sm'); rest -= 3; }
+      else if (rest === 2) { sizes.push('half', 'half'); rest = 0; }
+      else { sizes.push('wide'); rest = 0; }
     }
+    return sizes;
   }
 
-  function renderMarquee() {
-    const track = $('[data-marquee]');
-    if (!track) return;
-    const items = DATA.marcas.map((b) => `<span class="marquee__item">${escapeHTML(b)}</span>`).join('');
-    // Se duplica el contenido para que el desplazamiento sea continuo
-    track.innerHTML = `<div class="marquee__group" style="display:flex">${items}</div><div class="marquee__group" style="display:flex" aria-hidden="true">${items}</div>`;
-  }
-
-  /* ---------- Tarjetas de motos ---------- */
-  function cardHTML(m, i) {
-    const cuotas = m.financiacion && m.financiacion.cuotas;
+  function motoCard(m, i, size, total) {
+    const name = fullName(m);
     return `
-      <article class="moto-card" style="--i:${i}" data-tilt>
-        <div class="moto-card__media">
-          <img src="${escapeHTML(m.imagenes[0])}" alt="${escapeHTML(`${m.marca} ${m.modelo}`)}" loading="lazy" decoding="async" width="800" height="600">
-          <span class="moto-card__status status--${m.disponibilidad}">${STATUS[m.disponibilidad] || ''}</span>
-          ${m.etiqueta ? `<span class="moto-card__ribbon">${escapeHTML(m.etiqueta)}</span>` : ''}
-          <span class="moto-card__cc" aria-hidden="true">${m.cilindrada}<small>cc</small></span>
-        </div>
-        <div class="moto-card__body">
-          <div>
-            <p class="moto-card__brand">${escapeHTML(m.marca)}</p>
-            <h3 class="moto-card__title">${escapeHTML(m.modelo)}</h3>
-          </div>
-          <ul class="moto-card__specs" aria-label="Características">
-            <li>${m.cilindrada} cc</li>
-            <li>${m.anio}</li>
-            <li>${escapeHTML(m.categoria)}</li>
-          </ul>
-          <div class="moto-card__foot">
-            <p class="moto-card__price">
+      <article class="moto moto--${size}" style="--i:${i % 3}" data-id="${esc(m.id)}">
+        <a class="moto__media" href="#moto-${esc(m.id)}" data-open="${esc(m.id)}" aria-label="Ver ficha de la ${esc(name)}">
+          ${m.imagenes[0] ? `<img src="${esc(m.imagenes[0])}" alt="${esc(name)}" loading="lazy" decoding="async" width="900" height="1000">` : ''}
+          <span class="moto__num" aria-hidden="true">${pad(i + 1)}<span style="font-size:.4em;opacity:.8">/${pad(total)}</span></span>
+          ${m.etiqueta ? `<span class="moto__badge">${esc(m.etiqueta)}</span>` : ''}
+          <span class="moto__view" aria-hidden="true">Ver ficha <svg class="icon"><use href="#i-arrow"/></svg></span>
+        </a>
+        <div class="moto__info">
+          <p class="moto__brand">${esc(m.marca)} <span>${statusHTML(m.disponibilidad)}</span></p>
+          <h3 class="moto__model"><button type="button" data-open="${esc(m.id)}">${esc(m.modelo)}</button></h3>
+          <p class="moto__meta">${m.cilindrada} cc · ${esc(m.categoria)} · ${m.anio}</p>
+          <div class="moto__row">
+            <div class="moto__price">
               <small>Precio de contado</small>
-              <strong>${fmt(m.precio)}</strong>
-              ${cuotas ? `<span class="moto-card__fin">Hasta ${cuotas} cuotas · ver planes</span>` : ''}
-            </p>
-            <a class="moto-card__cta" href="${waLink(motoMessage(m))}" target="_blank" rel="noopener" aria-label="Consultar por WhatsApp por la ${escapeHTML(`${m.marca} ${m.modelo}`)}">
-              <svg class="icon" aria-hidden="true"><use href="#i-wa"/></svg>
-            </a>
+              <strong>${priceText(m.precio)}</strong>${typeof m.precio === 'number' ? refTag() : ''}
+              <p class="moto__fin">${esc(m.financiacion || 'Consultá alternativas de financiación')}</p>
+            </div>
+            <div class="moto__actions">
+              <button type="button" class="link-arrow moto__more" data-open="${esc(m.id)}">Ver ficha</button>
+              <a class="wa-round" href="${waLink(motoMsg(m))}" target="_blank" rel="noopener" aria-label="Consultar por WhatsApp por la ${esc(name)}">
+                <svg class="icon" aria-hidden="true"><use href="#i-wa"/></svg>
+              </a>
+            </div>
           </div>
         </div>
       </article>`;
   }
 
-  function initFeatured() {
-    const grid = $('[data-featured-grid]');
-    const tabsEl = $('[data-filter-tabs]');
-    if (!grid || !tabsEl) return;
+  const Collection = {
+    grid: null,
+    chips: null,
+    current: 'Todas',
 
-    const featured = DATA.motos.filter((m) => m.destacada);
-    const cats = ['Todas', ...DATA.categorias.filter((c) => featured.some((m) => m.categoria === c))];
-    const indicator = $('.filter-tabs__indicator', tabsEl);
+    init() {
+      this.grid = $('[data-collection]');
+      this.chips = $('[data-filter]');
+      if (!this.grid) return;
 
-    cats.forEach((c, i) => {
-      const n = c === 'Todas' ? featured.length : featured.filter((m) => m.categoria === c).length;
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'filter-tab';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-      b.dataset.cat = c;
-      b.innerHTML = `${c}<span class="filter-tab__count">${String(n).padStart(2, '0')}</span>`;
-      tabsEl.appendChild(b);
-    });
-
-    const moveIndicator = () => {
-      const active = $('.filter-tab[aria-selected="true"]', tabsEl);
-      if (!active) return;
-      indicator.style.setProperty('--x', `${active.offsetLeft}px`);
-      indicator.style.setProperty('--w', `${active.offsetWidth}px`);
-    };
-
-    let current = 'Todas';
-    let busy = false;
-
-    const draw = (cat, animate) => {
-      const list = cat === 'Todas' ? featured : featured.filter((m) => m.categoria === cat);
-      grid.classList.toggle('moto-grid--editorial', cat === 'Todas' && list.length > 3);
-      grid.innerHTML = list.length
-        ? list.map(cardHTML).join('')
-        : '<p class="moto-grid__empty">No hay motos en esta categoría por ahora.</p>';
-      $$('img', grid).forEach(guardImage);
-      if (animate && motionOK()) {
-        $$('.moto-card', grid).forEach((card) => {
-          card.classList.add('is-entering');
-          card.addEventListener('animationend', () => card.classList.remove('is-entering'), { once: true });
-        });
+      const brands = brandList();
+      if (this.chips) {
+        if (brands.length > 1) {
+          this.chips.innerHTML = [{ marca: 'Todas', n: DATA.motos.length }, ...brands].map((b) =>
+            `<button type="button" class="chip" data-chip="${esc(b.marca)}" aria-pressed="${b.marca === 'Todas'}">${esc(b.marca)}<sup>${pad(b.n)}</sup></button>`).join('');
+          this.chips.addEventListener('click', (e) => {
+            const c = e.target.closest('[data-chip]');
+            if (c) this.filter(c.dataset.chip);
+          });
+        } else {
+          this.chips.remove();
+        }
       }
-      bindTilt(grid);
-    };
 
-    tabsEl.addEventListener('click', (e) => {
-      const btn = e.target.closest('.filter-tab');
-      if (!btn || btn.dataset.cat === current || busy) return;
-      current = btn.dataset.cat;
-      $$('.filter-tab', tabsEl).forEach((t) => t.setAttribute('aria-selected', String(t === btn)));
-      moveIndicator();
-      btn.scrollIntoView({ block: 'nearest', inline: 'center', behavior: motionOK() ? 'smooth' : 'auto' });
+      this.grid.addEventListener('click', (e) => {
+        const t = e.target.closest('[data-open]');
+        if (!t) return;
+        e.preventDefault();
+        Sheet.open(t.dataset.open);
+      });
 
-      if (!motionOK()) { draw(current, false); return; }
-      busy = true;
-      $$('.moto-card', grid).forEach((c) => c.classList.add('is-leaving'));
-      setTimeout(() => { draw(current, true); busy = false; }, 280);
-    });
+      this.render(false);
+    },
 
-    // Navegación con flechas entre pestañas
-    tabsEl.addEventListener('keydown', (e) => {
-      if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-      const tabs = $$('.filter-tab', tabsEl);
-      const idx = tabs.indexOf(document.activeElement);
-      if (idx < 0) return;
-      const next = tabs[(idx + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
-      next.focus();
-      next.click();
-    });
+    list() {
+      return this.current === 'Todas' ? DATA.motos : DATA.motos.filter((m) => m.marca === this.current);
+    },
 
-    draw(current, false);
-    // Entrada escalonada la primera vez que la grilla aparece
-    grid.classList.add('reveal-stagger');
-    $$('.moto-card', grid).forEach((c, i) => c.style.setProperty('--i', i));
-    observeOnce(grid, () => grid.classList.add('is-in'), 0.08);
+    render(animate) {
+      const list = this.list();
+      const sizes = layoutSizes(list.length);
+      this.grid.innerHTML = list.length
+        ? list.map((m, i) => motoCard(m, i, sizes[i], list.length)).join('')
+        : '<p class="collection__empty">No hay motos de esta marca por ahora.</p>';
+      $$('img', this.grid).forEach(guard);
+      const cards = $$('.moto', this.grid);
+      if (animate) {
+        requestAnimationFrame(() => requestAnimationFrame(() => cards.forEach((c) => c.classList.add('is-in'))));
+      } else {
+        reveal(cards, { threshold: 0.08 });
+      }
+    },
 
-    requestAnimationFrame(moveIndicator);
-    window.addEventListener('resize', moveIndicator, { passive: true });
-    if (document.fonts) document.fonts.ready.then(moveIndicator);
-  }
+    filter(brand) {
+      if (brand === this.current) return;
+      this.current = brand;
+      if (this.chips) $$('[data-chip]', this.chips).forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.chip === brand)));
+      if (!motionOK()) { this.render(true); return; }
+      this.grid.classList.add('is-leaving');
+      setTimeout(() => { this.grid.classList.remove('is-leaving'); this.render(true); }, 320);
+    }
+  };
 
-  /* ---------- Estadísticas con contador ---------- */
-  function initStats() {
-    const wrap = $('[data-stats]');
-    if (!wrap) return;
-    wrap.innerHTML = DATA.nosotros.stats.map((s, i) => `
-      <div class="stat" data-reveal style="--i:${i}">
-        <p class="stat__value"><span class="stat__num" data-count="${s.valor}">0</span><span>${escapeHTML(s.sufijo)}</span></p>
-        <p class="stat__label">${escapeHTML(s.etiqueta)}</p>
-      </div>`).join('');
+  /* ---------- Ficha de moto (dialog) ---------- */
+  const Sheet = {
+    el: null,
+    idx: -1,
 
-    const nf = new Intl.NumberFormat('es-AR');
-    $$('[data-count]', wrap).forEach((el) => {
-      const target = Number(el.dataset.count);
-      if (!motionOK()) { el.textContent = nf.format(target); return; }
-      observeOnce(el, () => {
-        const dur = 1800;
-        const t0 = performance.now();
-        const tick = (now) => {
-          const p = clamp((now - t0) / dur, 0, 1);
-          const eased = 1 - Math.pow(1 - p, 4);
-          el.textContent = nf.format(Math.round(target * eased));
-          if (p < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }, 0.6);
-    });
-  }
+    init() {
+      this.el = $('[data-sheet]');
+      if (!this.el || typeof this.el.showModal !== 'function') return;
+      $('[data-sheet-close]', this.el).addEventListener('click', () => this.close());
+      $('[data-sheet-prev]', this.el).addEventListener('click', () => this.step(-1));
+      $('[data-sheet-next]', this.el).addEventListener('click', () => this.step(1));
+      this.el.addEventListener('cancel', (e) => { e.preventDefault(); this.close(); });
+      this.el.addEventListener('click', (e) => { if (e.target === this.el) this.close(); });
+      this.el.addEventListener('keydown', (e) => {
+        if (e.target.matches('select, input')) return;
+        if (e.key === 'ArrowRight') this.step(1);
+        if (e.key === 'ArrowLeft') this.step(-1);
+      });
+
+      // Enlace directo: index.html#moto-honda-xr-150l
+      const m = location.hash.match(/^#moto-(.+)$/);
+      if (m && DATA.motos.some((x) => x.id === m[1])) setTimeout(() => this.open(m[1]), 400);
+    },
+
+    render(swap) {
+      const m = DATA.motos[this.idx];
+      const total = DATA.motos.length;
+      const name = fullName(m);
+      $('[data-sheet-count]', this.el).textContent = `${pad(this.idx + 1)} / ${pad(total)}`;
+      const imgs = m.imagenes.length ? m.imagenes : [''];
+      const content = $('[data-sheet-content]', this.el);
+      content.innerHTML = `
+        <div class="sheet__layout ${swap ? 'is-swapping' : ''}">
+          <div class="gallery">
+            <div class="gallery__main">${imgs[0] ? `<img src="${esc(imgs[0])}" alt="${esc(name)}" decoding="async">` : ''}</div>
+            ${imgs.length > 1 ? `<div class="gallery__thumbs" role="group" aria-label="Fotos">
+              ${imgs.map((src, i) => `<button type="button" data-thumb="${i}" aria-label="Foto ${i + 1}" aria-current="${i === 0}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join('')}
+            </div>` : ''}
+          </div>
+          <div class="sheet__body">
+            <div class="sheet__brand">
+              <span class="label">${esc(m.marca)} · ${esc(m.categoria)}</span>
+              ${statusHTML(m.disponibilidad)}
+            </div>
+            <h2 class="sheet__title" id="sheet-title">${esc(m.modelo)}</h2>
+            <p class="sheet__summary">${esc(m.resumen || '')}</p>
+
+            <div class="sheet__price">
+              <small>Precio de contado</small>
+              <strong>${priceText(m.precio)}</strong>
+              <p>${CFG.demo ? 'Valor de referencia, sujeto a cambios. ' : ''}Confirmá el precio final al consultar.</p>
+            </div>
+
+            <div class="sheet__fin">
+              <h3>¿Querés financiarla?</h3>
+              <p>${esc(m.financiacion || 'Consultá alternativas de financiación')}. Te contamos las opciones vigentes según tu caso.</p>
+              <a class="link-arrow" href="${waLink(`Hola ${CFG.nombre}, quiero saber cómo financiar la ${name}.`)}" target="_blank" rel="noopener">
+                <svg class="icon icon--wa" aria-hidden="true"><use href="#i-wa"/></svg> Consultar financiación
+              </a>
+            </div>
+
+            <dl class="specs">
+              <div><dt>Marca</dt><dd>${esc(m.marca)}</dd></div>
+              <div><dt>Modelo</dt><dd>${esc(m.modelo)}</dd></div>
+              <div><dt>Cilindrada</dt><dd>${m.cilindrada} cc</dd></div>
+              <div><dt>Año</dt><dd>${m.anio}</dd></div>
+              ${(m.ficha || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
+            </dl>
+            <p class="sheet__note">Datos orientativos. Confirmá especificaciones y colores disponibles con nosotros.</p>
+
+            <div class="sheet__actions">
+              <a class="btn btn--accent btn--lg btn--block" href="${waLink(motoMsg(m))}" target="_blank" rel="noopener">
+                <svg class="icon" aria-hidden="true"><use href="#i-wa"/></svg><span>Consultar por esta moto</span>
+              </a>
+              <a class="btn btn--line btn--block" href="#financiacion" data-sheet-fin>Ver alternativas de financiación</a>
+            </div>
+          </div>
+        </div>`;
+      $$('img', content).forEach(guard);
+      content.scrollTop = 0;
+
+      const main = $('.gallery__main', content);
+      $$('[data-thumb]', content).forEach((b) => b.addEventListener('click', () => {
+        const src = imgs[Number(b.dataset.thumb)];
+        $$('[data-thumb]', content).forEach((x) => x.setAttribute('aria-current', String(x === b)));
+        const old = $('img', main);
+        const next = new Image();
+        next.alt = name;
+        next.src = src;
+        guard(next);
+        next.classList.add('is-out');
+        main.appendChild(next);
+        requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove('is-out')));
+        if (old) { old.classList.add('is-out'); setTimeout(() => old.remove(), 600); }
+      }));
+      $('[data-sheet-fin]', content).addEventListener('click', () => this.close());
+    },
+
+    open(id) {
+      const i = DATA.motos.findIndex((m) => m.id === id);
+      if (i < 0 || !this.el) return;
+      this.idx = i;
+      this.render(false);
+      if (!this.el.open) {
+        this.el.classList.remove('is-closing');
+        this.el.showModal();
+        document.body.style.overflow = 'hidden';
+      }
+      history.replaceState(null, '', `#moto-${id}`);
+    },
+
+    step(d) {
+      const n = DATA.motos.length;
+      this.idx = (this.idx + d + n) % n;
+      this.render(true);
+      history.replaceState(null, '', `#moto-${DATA.motos[this.idx].id}`);
+    },
+
+    close() {
+      if (!this.el || !this.el.open || this.el.classList.contains('is-closing')) return;
+      const done = () => {
+        this.el.classList.remove('is-closing');
+        this.el.close();
+        document.body.style.overflow = '';
+        history.replaceState(null, '', location.pathname + location.search);
+      };
+      if (!motionOK()) { done(); return; }
+      this.el.classList.add('is-closing');
+      setTimeout(done, 440);
+    }
+  };
 
   /* ---------- Financiación ---------- */
   function initFinance() {
     const F = DATA.financiacion;
 
-    const steps = $('[data-steps]');
-    if (steps) {
-      steps.classList.add('reveal-stagger');
-      steps.innerHTML = F.pasos.map((p, i) => `
-        <li class="step" style="--i:${i}">
-          <span class="step__num">${String(i + 1).padStart(2, '0')}</span>
-          <h3>${escapeHTML(p.titulo)}</h3>
-          <p>${escapeHTML(p.texto)}</p>
-          <span class="step__bar" aria-hidden="true"></span>
+    const ways = $('[data-ways]');
+    if (ways) {
+      ways.innerHTML = F.alternativas.map((a, i) => `
+        <li class="way" style="--i:${i}">
+          <div class="way__top"><span class="way__n">${pad(i + 1)}</span><span class="way__tag">${esc(a.bajada)}</span></div>
+          <h3>${esc(a.titulo)}</h3>
+          <p>${esc(a.texto)}</p>
+          <a class="link-arrow way__cta" href="${waLink(`Hola ${CFG.nombre}, ${a.consulta}.`)}" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true"><use href="#i-wa"/></svg> Consultar
+          </a>
         </li>`).join('');
-      observeOnce(steps, () => {
-        steps.classList.add('is-in');
-        $$('.step', steps).forEach((s) => s.classList.add('is-in'));
-      }, 0.2);
+      reveal($$('.way', ways), { threshold: 0.2 });
     }
 
     const req = $('[data-requisitos]');
-    if (req) req.innerHTML = F.requisitos.map((r) => `<li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>${escapeHTML(r)}</span></li>`).join('');
-
+    if (req) req.innerHTML = F.requisitos.map((r) => `<li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>${esc(r)}</span></li>`).join('');
     const med = $('[data-medios]');
-    if (med) med.innerHTML = F.medios.map((m) => `<li>${escapeHTML(m)}</li>`).join('');
+    if (med) med.innerHTML = F.medios.map((m) => `<li>${esc(m)}</li>`).join('');
+    const notice = $('[data-finance-notice]');
+    if (notice) notice.textContent = F.aviso;
 
-    const note = $('[data-finance-note]');
-    if (note) note.textContent = F.aviso;
+    initBuilder(F);
+    initPromos();
+  }
 
-    // Simulador
-    const sel = $('[data-sim-moto]');
-    const range = $('[data-sim-entrega]');
-    const plansEl = $('[data-sim-plans]');
-    if (!sel || !range || !plansEl) return;
+  function initBuilder(F) {
+    const form = $('[data-builder]');
+    if (!form) return;
+    const sel = $('[data-b-moto]', form);
+    const entregaEl = $('[data-b-entrega]', form);
+    const cuotasEl = $('[data-b-cuotas]', form);
+    const preview = $('[data-b-preview]', form);
+    const send = $('[data-b-send]', form);
+    const estimate = $('[data-b-estimate]', form);
 
-    sel.innerHTML = DATA.motos.map((m) => `<option value="${m.id}">${escapeHTML(`${m.marca} ${m.modelo}`)} — ${fmt(m.precio)}</option>`).join('');
-    range.min = F.entregaMinima;
-    range.max = F.entregaMaxima;
-    range.value = Math.max(F.entregaMinima, 30);
+    sel.innerHTML = DATA.motos.map((m) => `<option value="${esc(m.id)}">${esc(fullName(m))}</option>`).join('') +
+      '<option value="">Todavía no lo decidí</option>';
 
-    let plan = F.planes.includes(12) ? 12 : F.planes[0];
-    plansEl.innerHTML = F.planes.map((n) => `<button type="button" class="chip" data-plan="${n}" aria-pressed="${n === plan}">${n}</button>`).join('');
-
-    const out = {
-      entregaPct: $('[data-sim-entrega-out]'),
-      cuota: $('[data-sim-cuota]'),
-      entrega: $('[data-sim-entrega-monto]'),
-      saldo: $('[data-sim-saldo]'),
-      wa: $('[data-sim-wa]')
+    const state = { entrega: F.entregaOpciones[0], cuotas: F.cuotasOpciones.includes(12) ? 12 : F.cuotasOpciones[0] };
+    const seg = (el, opts, key, fmtLabel) => {
+      el.innerHTML = opts.map((o) => `<button type="button" data-v="${esc(o)}" aria-pressed="${String(o) === String(state[key])}">${esc(fmtLabel(o))}</button>`).join('');
+      el.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-v]');
+        if (!b) return;
+        state[key] = isNaN(Number(b.dataset.v)) ? b.dataset.v : Number(b.dataset.v);
+        $$('[data-v]', el).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        update();
+      });
     };
+    seg(entregaEl, F.entregaOpciones, 'entrega', (o) => o);
+    seg(cuotasEl, F.cuotasOpciones, 'cuotas', (o) => `${o}`);
 
-    let shown = 0;
-    let raf = 0;
-    const animateValue = (to) => {
-      cancelAnimationFrame(raf);
-      if (!motionOK()) { shown = to; out.cuota.innerHTML = `${fmt(to)}<small>/ mes</small>`; return; }
-      const from = shown;
-      const t0 = performance.now();
-      const step = (now) => {
-        const p = clamp((now - t0) / 600, 0, 1);
-        shown = lerp(from, to, 1 - Math.pow(1 - p, 3));
-        out.cuota.innerHTML = `${fmt(shown)}<small>/ mes</small>`;
-        if (p < 1) raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
-    };
+    function update() {
+      const m = DATA.motos.find((x) => x.id === sel.value);
+      const withEntrega = state.entrega !== F.entregaOpciones[0];
+      const msg = `Hola ${CFG.nombre}. ${m ? `Me interesa la ${fullName(m)}.` : 'Estoy buscando una moto y todavía no decidí el modelo.'} ` +
+        `${withEntrega ? 'Tengo una entrega' : 'No tengo entrega'} y me gustaría pagar en ${state.cuotas} cuotas. ` +
+        '¿Qué alternativas de financiación tienen y qué requisitos necesito?';
+      preview.textContent = msg;
+      send.href = waLink(msg);
 
-    const update = () => {
-      const m = DATA.motos.find((x) => x.id === sel.value) || DATA.motos[0];
-      const pct = Number(range.value);
-      const entrega = m.precio * pct / 100;
-      const saldo = m.precio - entrega;
-      const coef = F.coeficientesDemo[plan] || 1;
-      const cuota = saldo * coef / plan;
-
-      const fill = ((pct - range.min) / (range.max - range.min)) * 100;
-      range.style.setProperty('--fill', `${fill}%`);
-      out.entregaPct.textContent = `${pct}%`;
-      out.entrega.textContent = fmt(entrega);
-      out.saldo.textContent = fmt(saldo);
-      animateValue(cuota);
-
-      out.wa.href = waLink(`Hola ${CFG.nombre}, simulé un plan para la ${m.marca} ${m.modelo}: entrega del ${pct}% (${fmt(entrega)}) y ${plan} cuotas. ¿Me pasan las condiciones vigentes?`);
-    };
-
-    plansEl.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-plan]');
-      if (!b) return;
-      plan = Number(b.dataset.plan);
-      $$('[data-plan]', plansEl).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      update();
-    });
+      // Estimación solo si el negocio cargó coeficientes reales y no hay entrega.
+      const coef = F.coeficientes && F.coeficientes[state.cuotas];
+      if (coef && m && typeof m.precio === 'number' && !withEntrega) {
+        estimate.hidden = false;
+        estimate.innerHTML = `<span class="builder__preview-label" style="color:inherit;opacity:.6">Cuota estimada</span>
+          <div style="font-family:var(--f-display);font-weight:650;font-stretch:85%;font-size:2rem;line-height:1.1">${fmt(m.precio * coef / state.cuotas)} <small style="font-size:.9rem;opacity:.6">/ mes</small></div>
+          <small style="opacity:.6">Referencia sujeta a aprobación y condiciones vigentes.</small>`;
+      } else {
+        estimate.hidden = true;
+      }
+    }
     sel.addEventListener('change', update);
-    range.addEventListener('input', update);
     update();
   }
 
-  /* ---------- Promociones ---------- */
   function initPromos() {
-    const wrap = $('[data-promos]');
-    if (!wrap) return;
-    wrap.classList.add('reveal-stagger');
-    wrap.innerHTML = DATA.promociones.map((p, i) => `
-      <article class="promo ${p.destacada ? 'promo--hot' : ''}" style="--i:${i}">
-        <div class="promo__top">
-          <span class="promo__tag">${escapeHTML(p.etiqueta)}</span>
-          <span class="promo__index">${String(i + 1).padStart(2, '0')} / ${String(DATA.promociones.length).padStart(2, '0')}</span>
+    const wrap = $('[data-promos-wrap]');
+    const list = $('[data-promos]');
+    if (!wrap || !list || !DATA.promociones.length) return;
+    wrap.hidden = false;
+    list.innerHTML = DATA.promociones.map((p, i) => `
+      <article class="ticket" style="--i:${i}">
+        <div>
+          <h4>${esc(p.titulo)}</h4>
+          <p>${esc(p.texto)}</p>
+          <div class="ticket__meta"><span>${esc(p.vigencia)}</span>${p.demo ? '<span class="ref">Ejemplo</span>' : ''}</div>
+        </div>
+        <a class="ticket__go wa-round" href="${waLink(`Hola ${CFG.nombre}, quiero información sobre "${p.titulo}".`)}" target="_blank" rel="noopener" aria-label="Consultar por ${esc(p.titulo)}" style="border:0">
+          <svg class="icon" aria-hidden="true"><use href="#i-wa"/></svg>
+        </a>
+      </article>`).join('');
+    reveal($$('.ticket', list), { threshold: 0.2 });
+  }
+
+  /* ---------- Cascos ---------- */
+  function initHelmets() {
+    const rail = $('[data-helmets]');
+    if (!rail) return;
+    rail.innerHTML = DATA.cascos.map((c, i) => `
+      <article class="helmet" style="--i:${i}">
+        <div class="helmet__media">
+          ${c.imagenes && c.imagenes[0]
+            ? `<img src="${esc(c.imagenes[0])}" alt="${esc(c.nombre)}" loading="lazy" width="800" height="800">`
+            : '<span class="helmet__soon"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>Foto próximamente</span>'}
+          <span class="helmet__type">${statusHTML(c.disponibilidad)}</span>
         </div>
         <div>
-          <h3>${escapeHTML(p.titulo)}</h3>
-          <p>${escapeHTML(p.bajada)}</p>
+          <p class="label">${esc(c.tipo)}</p>
+          <h3 style="margin-top:8px">${esc(c.nombre)}</h3>
+          <p class="helmet__meta">Talles ${esc(c.talles)}</p>
+          <p class="helmet__detail">${esc(c.detalle)}</p>
         </div>
-        <div class="promo__foot">
-          <span>${escapeHTML(p.vigencia)}</span>
-          <a class="promo__go" href="${waLink(`Hola ${CFG.nombre}, quiero información sobre la promoción "${p.titulo}".`)}" target="_blank" rel="noopener" aria-label="Consultar por la promoción ${escapeHTML(p.titulo)}">
-            <svg class="icon" aria-hidden="true"><use href="#i-arrow-ur"/></svg>
-          </a>
+        <div class="helmet__row">
+          <span class="helmet__price">${priceText(c.precio)}</span>
+          <a class="link-arrow" href="${waLink(`Hola ${CFG.nombre}, quiero consultar por el ${c.nombre.toLowerCase()}: talles y colores disponibles.`)}" target="_blank" rel="noopener">Consultar talles</a>
         </div>
       </article>`).join('');
-    observeOnce(wrap, () => wrap.classList.add('is-in'), 0.15);
+    $$('img', rail).forEach(guard);
+    reveal($$('.helmet', rail), { threshold: 0.15 });
   }
 
-  /* ---------- Horarios y estado "abierto ahora" ---------- */
-  function initHours() {
-    const dl = $('[data-hours]');
-    const status = $('[data-open-status]');
-    const now = new Date();
-    const day = now.getDay();
-    const todayGroup = day === 0 ? 2 : day === 6 ? 1 : 0;
-
-    if (dl) {
-      dl.innerHTML = CFG.horariosTexto.map(([d, h], i) =>
-        `<div class="${i === todayGroup ? 'is-today' : ''}"><dt>${escapeHTML(d)}</dt><dd>${escapeHTML(h)}</dd></div>`).join('');
-    }
-    if (status) {
-      const mins = now.getHours() * 60 + now.getMinutes();
-      const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-      const open = (CFG.horarios[day] || []).some(([a, b]) => mins >= toMin(a) && mins < toMin(b));
-      status.textContent = open ? 'Abierto ahora' : 'Cerrado ahora';
-      status.classList.toggle('is-open', open);
-    }
-  }
-
-  /* ---------- Mapa (se carga bajo demanda para no frenar la página) ---------- */
+  /* ---------- Mapa bajo demanda ---------- */
   function initMap() {
     const frame = $('[data-map]');
     const btn = $('[data-map-load]');
     if (!frame || !btn) return;
     const load = () => {
-      if (frame.querySelector('iframe')) return;
-      const iframe = document.createElement('iframe');
-      iframe.title = `Ubicación de ${CFG.nombre} en el mapa`;
-      iframe.loading = 'lazy';
-      iframe.referrerPolicy = 'no-referrer-when-downgrade';
-      iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(CFG.mapaQuery)}&output=embed`;
-      frame.appendChild(iframe);
+      if ($('iframe', frame)) return;
+      const f = document.createElement('iframe');
+      f.title = `Ubicación de ${CFG.nombre}`;
+      f.loading = 'lazy';
+      f.referrerPolicy = 'no-referrer-when-downgrade';
+      f.src = `https://www.google.com/maps?q=${encodeURIComponent(CFG.mapaQuery)}&output=embed`;
+      frame.appendChild(f);
       btn.remove();
     };
     btn.addEventListener('click', load);
-    // También se carga solo cuando el usuario llega cerca de la sección
-    observeOnce(frame, load, 0.01, '200px');
-  }
-
-  /* ---------- Observador genérico ---------- */
-  function observeOnce(el, cb, threshold = 0.15, rootMargin = '0px 0px -8% 0px') {
-    if (!('IntersectionObserver' in window)) { cb(); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) { cb(en.target); io.unobserve(en.target); }
-      });
-    }, { threshold, rootMargin });
-    io.observe(el);
-  }
-
-  function initReveal() {
-    const els = $$('[data-reveal]');
-    if (!motionOK() || !('IntersectionObserver' in window)) {
-      els.forEach((el) => el.classList.add('is-in'));
-      return;
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { load(); io.disconnect(); } }, { rootMargin: '300px' });
+      io.observe(frame);
     }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
-
-    // Los títulos con máscara (clip-path) tienen área visible nula al inicio,
-    // por lo que el observador no los detecta: se observa su contenedor.
-    const proxied = new Map();
-    const ioProxy = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (!en.isIntersecting) return;
-        (proxied.get(en.target) || []).forEach((el) => el.classList.add('is-in'));
-        ioProxy.unobserve(en.target);
-      });
-    }, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
-
-    els.forEach((el) => {
-      if (el.dataset.reveal === 'clip') {
-        const parent = el.parentElement;
-        if (!proxied.has(parent)) { proxied.set(parent, []); ioProxy.observe(parent); }
-        proxied.get(parent).push(el);
-      } else {
-        io.observe(el);
-      }
-    });
   }
 
-  /* ---------- Header, progreso y botón flotante ---------- */
+  /* ---------- Header, progreso, dock y navegación activa ---------- */
   function initHeader() {
     const header = $('[data-header]');
-    const bar = $('.scroll-progress');
-    const wa = $('.wa-float');
+    const dock = $('[data-dock]');
     const hero = $('.hero');
-    const navLinks = $$('.nav__link');
+    const links = $$('.nav__link');
     let lastY = window.scrollY;
+    let ticking = false;
 
-    const onScroll = () => {
+    const update = () => {
+      ticking = false;
       const y = window.scrollY;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      bar.style.setProperty('--progress', max > 0 ? (y / max).toFixed(4) : 0);
-
-      header.classList.toggle('is-scrolled', y > 40);
-      const goingDown = y > lastY;
+      header.style.setProperty('--progress', max > 0 ? (y / max).toFixed(4) : 0);
+      header.classList.toggle('is-solid', y > 12);
       const menuOpen = document.body.classList.contains('menu-open');
-      header.classList.toggle('is-hidden', goingDown && y > 400 && !menuOpen);
+      header.classList.toggle('is-hidden', y > lastY && y > 520 && !menuOpen);
       lastY = y;
-
-      if (wa && hero) wa.classList.toggle('is-visible', y > hero.offsetHeight * 0.6);
+      if (dock && hero) dock.classList.toggle('is-visible', y > hero.offsetHeight * 0.55);
     };
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
 
-    // Resaltado de la sección activa en la navegación
     if ('IntersectionObserver' in window) {
-      const map = new Map(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+      const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
       const io = new IntersectionObserver((entries) => {
         entries.forEach((en) => {
-          const link = map.get(en.target.id);
-          if (link && en.isIntersecting) {
-            navLinks.forEach((l) => l.classList.toggle('is-active', l === link));
-          }
+          if (en.isIntersecting) links.forEach((l) => l.classList.toggle('is-active', l === byId.get(en.target.id)));
         });
       }, { rootMargin: '-45% 0px -50% 0px' });
-      map.forEach((_, id) => { const s = document.getElementById(id); if (s) io.observe(s); });
+      byId.forEach((_, id) => { const s = document.getElementById(id); if (s) io.observe(s); });
     }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
   }
 
   /* ---------- Menú móvil ---------- */
   function initMenu() {
     const btn = $('[data-menu-toggle]');
-    const menu = $('[data-mobile-menu]');
+    const menu = $('[data-menu]');
+    const label = $('[data-menu-label]');
     if (!btn || !menu) return;
-    $$('.mobile-menu__list a', menu).forEach((a, i) => a.style.setProperty('--i', i));
-    const focusables = () => $$('a, button', menu).concat(btn);
+    $$('.menu__list a', menu).forEach((a, i) => a.style.setProperty('--i', i));
 
-    const setOpen = (open) => {
+    const set = (open) => {
       btn.setAttribute('aria-expanded', String(open));
-      $('.visually-hidden', btn).textContent = open ? 'Cerrar menú' : 'Abrir menú';
+      label.textContent = open ? 'Cerrar' : 'Menú';
       menu.classList.toggle('is-open', open);
       menu.setAttribute('aria-hidden', String(!open));
       document.body.classList.toggle('menu-open', open);
       document.body.style.overflow = open ? 'hidden' : '';
-      if (open) setTimeout(() => { const f = $('a', menu); if (f) f.focus({ preventScroll: true }); }, 350);
+      if (open) setTimeout(() => { const a = $('a', menu); if (a) a.focus({ preventScroll: true }); }, 400);
     };
-
-    btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
-    menu.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+    btn.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
+    menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
     document.addEventListener('keydown', (e) => {
       if (!menu.classList.contains('is-open')) return;
-      if (e.key === 'Escape') { setOpen(false); btn.focus(); }
+      if (e.key === 'Escape') { set(false); btn.focus(); }
       if (e.key === 'Tab') {
-        const f = focusables();
-        const first = f[0];
-        const last = f[f.length - 1];
+        const f = [btn, ...$$('a, button', menu)];
+        const first = f[0], last = f[f.length - 1];
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       }
     });
-    window.matchMedia('(min-width: 900px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+    window.matchMedia('(min-width: 900px)').addEventListener('change', (e) => { if (e.matches) set(false); });
   }
 
-  /* ---------- Movimiento ligado al scroll (parallax, marquee, texto cinético) ---------- */
+  /* ---------- Movimiento ligado al scroll ---------- */
   function initScrollMotion() {
     if (!motionOK()) return;
+    const hero = $('.hero');
+    const img = $('.hero__photo img');
     const parallax = $$('[data-parallax]');
-    const kinetic = $$('[data-kinetic]');
-    const track = $('[data-marquee]');
-    let marqueeX = 0;
-    let velocity = 0;
-    let lastY = window.scrollY;
-    let skew = 0;
+    let ticking = false;
 
-    const loop = () => {
+    const frame = () => {
+      ticking = false;
       const y = window.scrollY;
       const vh = window.innerHeight;
-      const delta = y - lastY;
-      lastY = y;
-      velocity = lerp(velocity, delta, 0.1);
-
+      if (hero && img && y < hero.offsetHeight) {
+        const p = y / hero.offsetHeight;
+        img.style.setProperty('--py', `${(y * 0.14).toFixed(1)}px`);
+        img.style.setProperty('--ps', (1.08 + p * 0.06).toFixed(3));
+      }
       parallax.forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.bottom < -200 || r.top > vh + 200) return;
-        const speed = Number(el.dataset.parallax) || 0.1;
-        const center = r.top + r.height / 2 - vh / 2;
-        el.style.translate = `0 ${(center * speed).toFixed(1)}px`;
+        el.style.translate = `0 ${((r.top + r.height / 2 - vh / 2) * Number(el.dataset.parallax)).toFixed(1)}px`;
       });
-
-      kinetic.forEach((el) => {
-        const r = el.parentElement.getBoundingClientRect();
-        if (r.bottom < 0 || r.top > vh) return;
-        const progress = (vh - r.top) / (vh + r.height);
-        const dir = Number(el.dataset.kinetic);
-        el.style.setProperty('--kx', `${(dir * (progress * 40 - 20)).toFixed(2)}%`);
-      });
-
-      if (track) {
-        const half = track.scrollWidth / 2;
-        // Velocidad base + impulso según la velocidad del scroll
-        marqueeX -= 0.6 + Math.abs(velocity) * 0.5;
-        if (half > 0 && -marqueeX >= half) marqueeX += half;
-        skew = lerp(skew, clamp(velocity * -0.4, -10, 10), 0.12);
-        track.style.setProperty('--mx', `${marqueeX.toFixed(2)}px`);
-        track.style.setProperty('--skew', `${skew.toFixed(2)}deg`);
-      }
-
-      requestAnimationFrame(loop);
     };
-    requestAnimationFrame(loop);
-  }
-
-  /* ---------- Interacciones con el puntero ---------- */
-  function initHeroTilt() {
-    const media = $('[data-tilt-hero]');
-    if (!media || !motionOK() || !finePointer.matches) return;
-    const frame = $('.hero__frame', media);
-    const img = $('.hero__img', media);
-    const hero = $('.hero');
-    hero.addEventListener('pointermove', (e) => {
-      const r = hero.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      frame.style.setProperty('--rx', `${(x * 8).toFixed(2)}deg`);
-      frame.style.setProperty('--ry', `${(-y * 6).toFixed(2)}deg`);
-      img.style.setProperty('--px', `${(-x * 22).toFixed(1)}px`);
-      img.style.setProperty('--py', `${(-y * 16).toFixed(1)}px`);
-    });
-    hero.addEventListener('pointerleave', () => {
-      ['--rx', '--ry'].forEach((p) => frame.style.setProperty(p, '0deg'));
-      ['--px', '--py'].forEach((p) => img.style.setProperty(p, '0px'));
-    });
-  }
-
-  function bindTilt(ctx = document) {
-    if (!motionOK() || !finePointer.matches) return;
-    $$('[data-tilt]', ctx).forEach((card) => {
-      if (card.dataset.tiltBound) return;
-      card.dataset.tiltBound = '1';
-      card.addEventListener('pointermove', (e) => {
-        const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width;
-        const y = (e.clientY - r.top) / r.height;
-        card.style.setProperty('--ty', `${((x - 0.5) * 6).toFixed(2)}deg`);
-        card.style.setProperty('--tx', `${((0.5 - y) * 6).toFixed(2)}deg`);
-        card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
-        card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
-      });
-      card.addEventListener('pointerleave', () => {
-        card.style.setProperty('--tx', '0deg');
-        card.style.setProperty('--ty', '0deg');
-      });
-    });
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
+    frame();
   }
 
   function initMagnetic() {
@@ -608,55 +642,42 @@
     $$('[data-magnetic]').forEach((el) => {
       el.addEventListener('pointermove', (e) => {
         const r = el.getBoundingClientRect();
-        const x = e.clientX - (r.left + r.width / 2);
-        const y = e.clientY - (r.top + r.height / 2);
-        el.style.translate = `${(x * 0.18).toFixed(1)}px ${(y * 0.3).toFixed(1)}px`;
+        const x = clamp(e.clientX - (r.left + r.width / 2), -40, 40);
+        const y = clamp(e.clientY - (r.top + r.height / 2), -20, 20);
+        el.style.translate = `${(x * 0.16).toFixed(1)}px ${(y * 0.28).toFixed(1)}px`;
       });
       el.addEventListener('pointerleave', () => { el.style.translate = ''; });
     });
   }
 
-  /* ---------- Preloader + inicio ---------- */
-  function startIntro() {
-    const pre = $('.preloader');
-    const count = $('[data-preloader-count]');
-    const reveal = () => {
-      if (pre) pre.classList.add('is-done');
-      requestAnimationFrame(() => root.classList.add('is-ready'));
-    };
-
-    if (!pre || !motionOK()) { reveal(); return; }
-
-    // Contador breve (máx. ~1,1 s) para no demorar la navegación
-    const t0 = performance.now();
-    const dur = 1100;
-    const tick = (now) => {
-      const p = clamp((now - t0) / dur, 0, 1);
-      if (count) count.textContent = String(Math.round(p * 100)).padStart(2, '0');
-      if (p < 1) requestAnimationFrame(tick);
-      else setTimeout(reveal, 120);
-    };
-    requestAnimationFrame(tick);
+  /* ---------- Revelados genéricos ---------- */
+  function initReveal() {
+    reveal($$('[data-reveal]'), { threshold: 0.15 });
   }
 
-  /* ---------- Arranque ---------- */
+  /* ---------- Inicio: espera breve a las fuentes para evitar saltos ---------- */
+  function start() {
+    const go = () => requestAnimationFrame(() => root.classList.add('is-ready'));
+    if (!motionOK() || !document.fonts) { go(); return; }
+    Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 700))]).then(go);
+  }
+
   function init() {
-    fillContactInfo();
-    fillHero();
-    renderMarquee();
-    initFeatured();
-    initStats();
+    fillStatic();
+    splitWords();
+    initHero();
+    initBrands();
+    Collection.init();
+    Sheet.init();
     initFinance();
-    initPromos();
-    initHours();
+    initHelmets();
     initMap();
     initReveal();
     initHeader();
     initMenu();
     initScrollMotion();
-    initHeroTilt();
     initMagnetic();
-    startIntro();
+    start();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none" stroke="#1f1e1c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Ilustración de casco">
+  <path d="M46 150 C40 92 82 52 132 52 C178 52 206 88 204 134 L204 168 C204 178 196 184 186 184 L92 184 C70 184 50 172 46 150 Z" stroke-opacity=".55"/>
+  <path d="M116 104 L196 104 C204 104 206 112 204 120 L198 142 L128 142 C118 142 110 134 110 124 L110 110 C110 106 112 104 116 104 Z" stroke="#d24a1e"/>
+  <path d="M66 162 L184 162" stroke-opacity=".22"/>
+  <path d="M84 74 C100 66 116 63 132 63" stroke-opacity=".22"/>
+  <circle cx="92" cy="128" r="4" fill="#d24a1e" stroke="none"/>
+</svg>

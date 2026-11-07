@@ -1,219 +1,180 @@
 /* ==========================================================================
    SOLARI MOTOS — Datos del sitio
    --------------------------------------------------------------------------
-   ⚠️  CONTENIDO DE DEMOSTRACIÓN
-   Todos los precios, condiciones de financiación, promociones, datos de
-   contacto y fotografías de este archivo son PROVISORIOS y sirven solo
-   para evaluar el diseño. Reemplazarlos por la información real antes de
-   publicar el sitio.
+   Este archivo es la ÚNICA fuente de contenido. El diseño se arma solo a
+   partir de estos datos: agregar una moto, una marca o un casco nuevo no
+   requiere tocar HTML ni CSS.
 
-   Este archivo es la única fuente de contenido del sitio. En la Etapa 4
-   el administrador local podrá sobrescribir estos valores mediante
-   localStorage (solo en el navegador donde se edite).
+   ⚠️  CONTENIDO PROVISORIO
+   - Precios: valores de referencia para evaluar el diseño (config.demo).
+   - Financiación y promociones: textos genéricos. Reemplazar por las
+     condiciones REALES que defina el negocio antes de publicar.
+   - Fotos de motos: imágenes de referencia (Unsplash). Reemplazar por fotos
+     propias en /assets/images/ cuando estén disponibles.
+   - Cascos y local: sin fotos todavía → se muestran espacios preparados.
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  /* Fotografías de referencia (Unsplash). Reemplazar por fotos propias
-     guardadas en /assets/images/ cuando estén disponibles. */
-  const img = (id, w = 1200) =>
-    `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=72`;
-
-  const PHOTOS = {
-    hero: img('photo-1558981806-ec527fa84c39', 1600),
-    a: img('photo-1568772585407-9361f9bf3a87'),
-    b: img('photo-1609630875171-b1321377ee65'),
-    c: img('photo-1558981403-c5f9899a28bc'),
-    d: img('photo-1591637333184-19aa84b3e01f'),
-    e: img('photo-1449426468159-d96dbf08f19f'),
-    f: img('photo-1580310614729-ccd69652491d'),
-    g: img('photo-1622185135505-2d795003994a'),
-    h: img('photo-1558980664-769d59546b3d'),
-    i: img('photo-1547549082-6bc09f2049ae'),
-    road: img('photo-1525160354320-d8e92641c563', 1600),
-    shop: img('photo-1517846693594-1567da72af75'),
-    shop2: img('photo-1571068316344-75bc76f77890')
-  };
+  const img = (id, w = 1400) =>
+    `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=74`;
 
   const config = {
     nombre: 'Solari Motos',
-    eslogan: 'Tu próxima moto te está esperando',
-    // Número en formato internacional, sin "+" ni espacios (DEMO)
-    whatsapp: '5491100000000',
-    whatsappVisible: '+54 9 11 0000-0000',
-    telefono: '+54 11 0000-0000',
+    // Muestra la marca "Referencia" junto a precios y condiciones de ejemplo.
+    demo: true,
+    // WhatsApp en formato internacional, sin "+" ni espacios (PROVISORIO)
+    whatsapp: '5493790000000',
+    whatsappVisible: '+54 9 379 000-0000',
+    telefono: '+54 379 000-0000',
     email: 'hola@solarimotos.com.ar',
-    direccion: 'Av. Ejemplo 1234',
-    localidad: 'Ciudad Autónoma de Buenos Aires',
-    mapaQuery: 'Obelisco, Buenos Aires',
-    // Horarios: 0 = domingo … 6 = sábado. Rangos en formato 24 h.
+    direccion: 'Dirección a confirmar',
+    localidad: 'Tu localidad',
+    provincia: 'Corrientes',
+    mapaQuery: 'Corrientes, Argentina',
+    // 0 = domingo … 6 = sábado. Rangos en formato 24 h.
     horarios: {
-      1: [['09:00', '13:00'], ['15:30', '19:30']],
-      2: [['09:00', '13:00'], ['15:30', '19:30']],
-      3: [['09:00', '13:00'], ['15:30', '19:30']],
-      4: [['09:00', '13:00'], ['15:30', '19:30']],
-      5: [['09:00', '13:00'], ['15:30', '19:30']],
-      6: [['09:00', '13:30']],
+      1: [['08:00', '12:00'], ['16:30', '20:30']],
+      2: [['08:00', '12:00'], ['16:30', '20:30']],
+      3: [['08:00', '12:00'], ['16:30', '20:30']],
+      4: [['08:00', '12:00'], ['16:30', '20:30']],
+      5: [['08:00', '12:00'], ['16:30', '20:30']],
+      6: [['08:30', '12:30']],
       0: []
     },
     horariosTexto: [
-      ['Lunes a viernes', '9:00 – 13:00 · 15:30 – 19:30'],
-      ['Sábados', '9:00 – 13:30'],
-      ['Domingos y feriados', 'Cerrado']
+      ['Lunes a viernes', '8:00–12:00 · 16:30–20:30'],
+      ['Sábados', '8:30–12:30'],
+      ['Domingos', 'Cerrado']
     ],
     redes: {
       instagram: 'https://instagram.com/',
-      facebook: 'https://facebook.com/',
-      tiktok: 'https://tiktok.com/'
+      facebook: 'https://facebook.com/'
     },
     mensajeWhatsApp: 'Hola Solari Motos, quiero hacer una consulta.'
   };
 
-  const categorias = ['Calle', 'Sport', 'Naked', 'Trail', 'Scooter', 'Custom'];
-
+  /* ---------- Motos ----------
+     disponibilidad: 'disponible' | 'ultima' | 'pedido' | 'reservada'
+     precio: número (contado) o null para mostrar "Consultar precio".
+     imagenes: la primera es la principal. */
   const motos = [
-    {
-      id: 'benelli-trk-251',
-      marca: 'Benelli', modelo: 'TRK 251', categoria: 'Trail',
-      cilindrada: 249, anio: 2026, precio: 7890000,
-      disponibilidad: 'disponible', destacada: true, etiqueta: 'Más elegida',
-      imagenes: [PHOTOS.hero, PHOTOS.road, PHOTOS.e],
-      resumen: 'Aventura liviana para ruta y ciudad, con postura cómoda y gran autonomía.',
-      financiacion: { cuotas: 24, texto: 'Hasta 24 cuotas fijas con DNI (demo)' }
-    },
-    {
-      id: 'yamaha-mt-03',
-      marca: 'Yamaha', modelo: 'MT-03', categoria: 'Naked',
-      cilindrada: 321, anio: 2026, precio: 11950000,
-      disponibilidad: 'ultimas', destacada: true, etiqueta: 'Bicilíndrica',
-      imagenes: [PHOTOS.a, PHOTOS.b],
-      resumen: 'Bicilíndrica de carácter urbano, ágil y con respuesta inmediata.',
-      financiacion: { cuotas: 18, texto: 'Hasta 18 cuotas con tarjeta (demo)' }
-    },
-    {
-      id: 'ktm-duke-390',
-      marca: 'KTM', modelo: '390 Duke', categoria: 'Naked',
-      cilindrada: 399, anio: 2026, precio: 12400000,
-      disponibilidad: 'disponible', destacada: true, etiqueta: 'Nuevo modelo',
-      imagenes: [PHOTOS.d, PHOTOS.c],
-      resumen: 'Liviana, filosa y equipada. La naked para quienes buscan sensaciones.',
-      financiacion: { cuotas: 12, texto: 'Hasta 12 cuotas sin interés (demo)' }
-    },
     {
       id: 'honda-xr-150l',
       marca: 'Honda', modelo: 'XR 150L', categoria: 'Trail',
       cilindrada: 149, anio: 2026, precio: 4350000,
-      disponibilidad: 'disponible', destacada: true, etiqueta: '',
-      imagenes: [PHOTOS.f, PHOTOS.e],
-      resumen: 'Robusta, económica y lista para cualquier camino.',
-      financiacion: { cuotas: 36, texto: 'Hasta 36 cuotas con DNI (demo)' }
+      disponibilidad: 'disponible', etiqueta: 'Para todo camino',
+      imagenes: [img('photo-1558981806-ec527fa84c39'), img('photo-1449426468159-d96dbf08f19f'), img('photo-1525160354320-d8e92641c563')],
+      resumen: 'Robusta y simple de mantener. Va igual de bien en el asfalto del centro que en el camino de tierra.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Ciudad, ruta y tierra'], ['Garantía', 'Oficial de fábrica']]
     },
     {
-      id: 'royal-enfield-classic-350',
-      marca: 'Royal Enfield', modelo: 'Classic 350', categoria: 'Custom',
-      cilindrada: 349, anio: 2025, precio: 8990000,
-      disponibilidad: 'pedido', destacada: true, etiqueta: 'Clásica',
-      imagenes: [PHOTOS.g, PHOTOS.h],
-      resumen: 'Estilo clásico, andar sereno y presencia en cada esquina.',
-      financiacion: { cuotas: 24, texto: 'Hasta 24 cuotas fijas (demo)' }
-    },
-    {
-      id: 'bajaj-rouser-ns-200',
-      marca: 'Bajaj', modelo: 'Rouser NS 200', categoria: 'Sport',
-      cilindrada: 199, anio: 2026, precio: 5290000,
-      disponibilidad: 'disponible', destacada: true, etiqueta: 'Promo',
-      imagenes: [PHOTOS.i, PHOTOS.c],
-      resumen: 'Deportiva accesible con chasis perimetral y gran rendimiento.',
-      financiacion: { cuotas: 24, texto: 'Anticipo + 24 cuotas (demo)' }
-    },
-    {
-      id: 'zanella-styler-150',
-      marca: 'Zanella', modelo: 'Styler 150 Exclusive', categoria: 'Scooter',
-      cilindrada: 150, anio: 2026, precio: 3180000,
-      disponibilidad: 'disponible', destacada: false, etiqueta: '',
-      imagenes: [PHOTOS.b],
-      resumen: 'Scooter urbano con estilo retro y bajo consumo.',
-      financiacion: { cuotas: 18, texto: 'Hasta 18 cuotas (demo)' }
-    },
-    {
-      id: 'honda-wave-110',
+      id: 'honda-wave-110-s',
       marca: 'Honda', modelo: 'Wave 110 S', categoria: 'Calle',
       cilindrada: 109, anio: 2026, precio: 2650000,
-      disponibilidad: 'reservada', destacada: false, etiqueta: '',
-      imagenes: [PHOTOS.c],
-      resumen: 'La compañera de todos los días: simple, confiable y económica.',
-      financiacion: { cuotas: 36, texto: 'Hasta 36 cuotas con DNI (demo)' }
+      disponibilidad: 'disponible', etiqueta: 'La de todos los días',
+      imagenes: [img('photo-1609630875171-b1321377ee65'), img('photo-1558981403-c5f9899a28bc')],
+      resumen: 'Económica, liviana y confiable. La compañera ideal para ir al trabajo, al colegio o hacer mandados.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+    },
+    {
+      id: 'zanella-zb-110',
+      marca: 'Zanella', modelo: 'ZB 110', categoria: 'Calle',
+      cilindrada: 107, anio: 2026, precio: 1890000,
+      disponibilidad: 'ultima', etiqueta: '',
+      imagenes: [img('photo-1568772585407-9361f9bf3a87'), img('photo-1580310614729-ccd69652491d')],
+      resumen: 'Práctica y accesible, pensada para moverse por la ciudad gastando poco.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+    },
+    {
+      id: 'corven-energy-110',
+      marca: 'Corven', modelo: 'Energy 110', categoria: 'Calle',
+      cilindrada: 107, anio: 2026, precio: 1790000,
+      disponibilidad: 'disponible', etiqueta: '',
+      imagenes: [img('photo-1622185135505-2d795003994a'), img('photo-1558980664-769d59546b3d')],
+      resumen: 'Una opción económica y rendidora para dar el primer paso a tu propia moto.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+    },
+    {
+      id: 'guerrero-trip-110',
+      marca: 'Guerrero', modelo: 'Trip 110', categoria: 'Calle',
+      cilindrada: 107, anio: 2026, precio: 1750000,
+      disponibilidad: 'pedido', etiqueta: '',
+      imagenes: [img('photo-1547549082-6bc09f2049ae'), img('photo-1591637333184-19aa84b3e01f')],
+      resumen: 'Sencilla y resistente. Ideal para el uso diario con un costo de mantenimiento bajo.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
     }
   ];
 
-  const promociones = [
-    {
-      id: 'promo-casco',
-      titulo: 'Casco de regalo',
-      bajada: 'Llevate un casco certificado con la compra de cualquier 0km seleccionada.',
-      etiqueta: 'Regalo',
-      vigencia: 'Demo · Vigencia a definir',
-      destacada: true
-    },
-    {
-      id: 'promo-patentamiento',
-      titulo: 'Patentamiento bonificado',
-      bajada: 'Bonificamos un porcentaje del patentamiento en modelos de 150 a 250 cc.',
-      etiqueta: 'Ahorro',
-      vigencia: 'Demo · Condiciones a confirmar',
-      destacada: false
-    },
-    {
-      id: 'promo-permuta',
-      titulo: 'Tu usada vale más',
-      bajada: 'Tomamos tu moto usada como parte de pago con tasación en el momento.',
-      etiqueta: 'Permuta',
-      vigencia: 'Demo · Sujeto a evaluación',
-      destacada: false
-    }
+  /* ---------- Cascos ----------
+     Sin fotos propias todavía: imagenes vacías muestran un espacio preparado. */
+  const cascos = [
+    { id: 'casco-integral', tipo: 'Integral', nombre: 'Casco integral', talles: 'S · M · L · XL', precio: null, disponibilidad: 'disponible', imagenes: [], detalle: 'Protección completa con visor. Para ruta y uso diario.' },
+    { id: 'casco-rebatible', tipo: 'Rebatible', nombre: 'Casco rebatible', talles: 'M · L · XL', precio: null, disponibilidad: 'disponible', imagenes: [], detalle: 'Mentonera que se levanta: comodidad de un abierto con protección de un integral.' },
+    { id: 'casco-abierto', tipo: 'Abierto', nombre: 'Casco abierto (jet)', talles: 'S · M · L', precio: null, disponibilidad: 'disponible', imagenes: [], detalle: 'Liviano y fresco, ideal para la ciudad y el calor.' }
   ];
 
+  /* ---------- Financiación ----------
+     Textos GENÉRICOS a validar. No incluir tasas, montos ni promesas de
+     aprobación que no hayan sido confirmados por el negocio. */
   const financiacion = {
-    aviso: 'Contenido de demostración. Las condiciones, coeficientes y requisitos son ilustrativos y deben reemplazarse por las condiciones reales vigentes.',
-    pasos: [
-      { titulo: 'Elegí tu moto', texto: 'Recorré el catálogo y marcá el modelo que te gusta.' },
-      { titulo: 'Consultá por WhatsApp', texto: 'Te enviamos un plan a medida con entrega y cuotas.' },
-      { titulo: 'Presentá tu DNI', texto: 'Evaluamos tu solicitud de forma rápida y sin vueltas.' },
-      { titulo: 'Retirá y rodá', texto: 'Firmás, patentamos y te llevás tu moto lista para salir.' }
+    alternativas: [
+      {
+        titulo: 'Crédito personal',
+        bajada: 'Con tu DNI',
+        texto: 'Financiá tu moto en cuotas fijas a través de una entidad crediticia. Sujeto a evaluación y aprobación de la entidad.',
+        consulta: 'quiero consultar por crédito personal con DNI'
+      },
+      {
+        titulo: 'Tarjetas de crédito',
+        bajada: 'Bancarias',
+        texto: 'Pagá en cuotas con tu tarjeta. La cantidad de cuotas depende del banco y de las promociones vigentes.',
+        consulta: 'quiero saber en cuántas cuotas puedo pagar con tarjeta'
+      },
+      {
+        titulo: 'Entrega + cuotas',
+        bajada: 'A tu medida',
+        texto: 'Si contás con un anticipo, lo tomamos como entrega y financiamos el saldo para que la cuota sea menor.',
+        consulta: 'tengo un anticipo y quiero saber cómo financiar el resto'
+      },
+      {
+        titulo: 'Contado',
+        bajada: 'Efectivo o transferencia',
+        texto: 'Pagás una sola vez y te llevás la moto. Consultá si hay un precio especial de contado.',
+        consulta: 'quiero consultar el precio de contado'
+      }
     ],
     requisitos: [
-      'DNI vigente (titular mayor de 18 años)',
-      'Comprobante de ingresos o recibo de sueldo',
-      'Servicio a nombre del titular',
-      'Sin informes negativos (según entidad)'
+      'DNI vigente',
+      'Comprobante de ingresos',
+      'Servicio o comprobante de domicilio',
+      'Otros requisitos según la entidad'
     ],
-    medios: ['Efectivo', 'Transferencia', 'Tarjeta de débito', 'Tarjetas de crédito', 'Crédito con DNI', 'Permuta'],
-    entregaMinima: 20,   // % (demo)
-    entregaMaxima: 70,   // % (demo)
-    planes: [6, 12, 18, 24, 36],
-    // Coeficiente total sobre el saldo financiado. SOLO DEMOSTRATIVO.
-    coeficientesDemo: { 6: 1.18, 12: 1.36, 18: 1.55, 24: 1.74, 36: 2.12 }
+    medios: ['Efectivo', 'Transferencia', 'Débito', 'Tarjetas de crédito', 'Crédito personal'],
+    // Opciones que la persona puede elegir al armar su consulta.
+    entregaOpciones: ['Sin entrega', 'Con entrega'],
+    cuotasOpciones: [6, 12, 18, 24],
+    // Coeficientes REALES por plan, ej.: { 12: 1.45 }. En null no se muestra
+    // ningún monto estimado: la cuota se informa por WhatsApp.
+    coeficientes: null,
+    aviso: 'Toda financiación está sujeta a evaluación crediticia. Las condiciones, cuotas y requisitos se confirman al momento de la consulta.'
   };
 
-  const nosotros = {
-    desde: 2009,
-    stats: [
-      { valor: 17, sufijo: '', etiqueta: 'años en el camino' },
-      { valor: 3200, sufijo: '+', etiqueta: 'motos entregadas' },
-      { valor: 12, sufijo: '', etiqueta: 'marcas disponibles' },
-      { valor: 48, sufijo: 'h', etiqueta: 'para tu aprobación*' }
-    ],
-    fotos: [PHOTOS.shop, PHOTOS.shop2, PHOTOS.road]
-  };
+  /* ---------- Promociones ----------
+     demo: true muestra la marca "Ejemplo". Dejar el arreglo vacío para
+     ocultar el bloque. */
+  const promociones = [
+    { id: 'promo-casco', titulo: 'Tu 0km con casco', texto: 'Consultá por el casco incluido en la compra de modelos seleccionados.', vigencia: 'Vigencia a confirmar', demo: true },
+    { id: 'promo-contado', titulo: 'Beneficio de contado', texto: 'Precio especial pagando en efectivo o transferencia.', vigencia: 'Vigencia a confirmar', demo: true }
+  ];
 
-  const marcas = ['Honda', 'Yamaha', 'KTM', 'Benelli', 'Royal Enfield', 'Bajaj', 'Zanella', 'Motomel', 'Corven', 'Keller', 'Gilera', 'Suzuki'];
-
-  const defaults = { config, categorias, motos, promociones, financiacion, nosotros, marcas, photos: PHOTOS };
-
-  /* Punto único de acceso a los datos. En la Etapa 4 se sumará la lectura
-     de cambios guardados localmente por el administrador. */
   window.SolariData = {
-    get() { return defaults; }
+    get() { return { config, motos, cascos, financiacion, promociones }; }
   };
 })();
