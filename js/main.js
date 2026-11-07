@@ -29,13 +29,21 @@
   function initBrands() {
     const ul = $('[data-brands]');
     if (!ul) return;
-    ul.innerHTML = S.brandList().map((b, i) => `
-      <li class="brand-item" style="--i:${i}">
-        <button type="button" data-brand="${esc(b.marca)}" aria-label="Ver motos ${esc(b.marca)}">
-          <span class="brand-item__name">${esc(b.marca)}</span>
-          <span class="brand-item__count">${pad(b.n)} ${b.n === 1 ? 'modelo' : 'modelos'}</span>
-        </button>
-      </li>`).join('');
+    // Marcas con motos cargadas: filtran la colección.
+    // Marcas sin motos en la web: abren una consulta por WhatsApp.
+    ul.innerHTML = S.allBrands().map((b, i) => b.n
+      ? `<li class="brand-item" style="--i:${i}">
+          <button type="button" data-brand="${esc(b.marca)}" aria-label="Ver motos ${esc(b.marca)}">
+            <span class="brand-item__name">${esc(b.marca)}</span>
+            <span class="brand-item__count">${pad(b.n)} ${b.n === 1 ? 'modelo' : 'modelos'}</span>
+          </button>
+        </li>`
+      : `<li class="brand-item brand-item--ask" style="--i:${i}">
+          <a href="${S.waLink(`Hola ${CFG.nombre}, ¿qué modelos de ${b.marca} tienen disponibles?`)}" target="_blank" rel="noopener" aria-label="Consultar modelos ${esc(b.marca)} por WhatsApp">
+            <span class="brand-item__name">${esc(b.marca)}</span>
+            <span class="brand-item__count">Consultar</span>
+          </a>
+        </li>`).join('');
     ul.addEventListener('click', (e) => {
       const b = e.target.closest('[data-brand]');
       if (!b) return;
@@ -147,26 +155,84 @@
     seg($('[data-b-entrega]', form), F.entregaOpciones, 'entrega');
     seg($('[data-b-cuotas]', form), F.cuotasOpciones, 'cuotas');
 
+    /* Monto de la entrega: se escribe libre y se formatea con puntos de miles */
+    const amountWrap = $('[data-b-amount-wrap]', form);
+    const amount = $('[data-b-amount]', form);
+    const hint = $('[data-b-amount-hint]', form);
+    const quick = $('[data-b-quick]', form);
+    const nameInput = $('[data-b-name]', form);
+    const nf = new Intl.NumberFormat('es-AR');
+    const readAmount = () => Number(amount.value.replace(/\D/g, '')) || 0;
+
+    const quickValues = () => {
+      const m = DATA.motos.find((x) => x.id === sel.value);
+      if (m && S.hasPrice(m)) {
+        return [0.2, 0.3, 0.5].map((p) => ({ v: Math.round((m.precio * p) / 50000) * 50000, label: `${p * 100}%` }));
+      }
+      return [300000, 500000, 1000000].map((v) => ({ v, label: '' }));
+    };
+    const renderQuick = () => {
+      quick.innerHTML = quickValues().map((q) =>
+        `<button type="button" class="chip chip--sm" data-q="${q.v}">${fmt(q.v)}${q.label ? ` <sup>${q.label}</sup>` : ''}</button>`).join('');
+    };
+    quick.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-q]');
+      if (!b) return;
+      amount.value = nf.format(Number(b.dataset.q));
+      update();
+    });
+    amount.addEventListener('input', () => {
+      const n = readAmount();
+      amount.value = n ? nf.format(n) : '';
+      update();
+    });
+    nameInput.addEventListener('input', update);
+
     function update() {
       const m = DATA.motos.find((x) => x.id === sel.value);
       const withEntrega = state.entrega !== F.entregaOpciones[0];
-      const msg = `Hola ${CFG.nombre}. ${m ? `Me interesa la ${S.fullName(m)}.` : 'Estoy buscando una moto y todavía no decidí el modelo.'} ` +
-        `${withEntrega ? 'Tengo una entrega' : 'No tengo entrega'} y me gustaría pagar en ${state.cuotas} cuotas. ` +
-        '¿Qué alternativas de financiación tienen y qué requisitos necesito?';
+      amountWrap.hidden = !withEntrega;
+      const monto = withEntrega ? readAmount() : 0;
+
+      // Referencia del monto respecto del precio de contado
+      if (withEntrega && m && S.hasPrice(m) && monto) {
+        const pct = Math.round((monto / m.precio) * 100);
+        hint.textContent = monto >= m.precio
+          ? 'El monto cubre el precio de contado de referencia.'
+          : `Equivale al ${pct}% del precio de contado de referencia. Saldo aproximado a financiar: ${fmt(m.precio - monto)}.`;
+      } else {
+        hint.textContent = withEntrega ? 'Escribí el monto aproximado o elegí una opción rápida.' : '';
+      }
+
+      const nombre = nameInput.value.trim();
+      const entregaTxt = !withEntrega
+        ? 'No tengo entrega'
+        : monto ? `Tengo ${fmt(monto)} para entregar` : 'Tengo una entrega (monto a definir)';
+      const msg = `Hola ${CFG.nombre}${nombre ? `, soy ${nombre}` : ''}. ` +
+        `${m ? `Me interesa la ${S.fullName(m)}.` : 'Estoy buscando una moto y todavía no decidí el modelo.'} ` +
+        `${entregaTxt} y me gustaría pagar el resto en ${state.cuotas} cuotas. ` +
+        '¿Qué plan de financiación me pueden armar y qué requisitos necesito?';
       preview.textContent = msg;
       send.href = S.waLink(msg);
-      // Estimación solo si el negocio cargó coeficientes reales y no hay entrega.
+
+      // Estimación solo si el negocio cargó coeficientes reales
       const coef = F.coeficientes && F.coeficientes[state.cuotas];
-      if (coef && m && S.hasPrice(m) && !withEntrega) {
+      if (coef && m && S.hasPrice(m) && monto < m.precio) {
         estimate.hidden = false;
         estimate.innerHTML = `<span class="builder__preview-label">Cuota estimada</span>
-          <strong class="builder__amount">${fmt(m.precio * coef / state.cuotas)} <small>/ mes</small></strong>
+          <strong class="builder__amount">${fmt(((m.precio - monto) * coef) / state.cuotas)} <small>/ mes</small></strong>
           <small>Referencia sujeta a aprobación y condiciones vigentes.</small>`;
       } else {
         estimate.hidden = true;
       }
     }
-    sel.addEventListener('change', update);
+
+    // Moto preseleccionada desde la ficha: index.html?moto=<id>#financiacion
+    const pre = new URLSearchParams(location.search).get('moto');
+    if (pre && DATA.motos.some((x) => x.id === pre)) sel.value = pre;
+
+    sel.addEventListener('change', () => { renderQuick(); update(); });
+    renderQuick();
     update();
   }
 

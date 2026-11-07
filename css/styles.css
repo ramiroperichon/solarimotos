@@ -223,24 +223,8 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .header__inner { height: 100%; display: flex; align-items: center; gap: 20px; }
 
 .brand { display: inline-flex; align-items: center; gap: 10px; margin-right: auto; }
-.brand__mark {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--accent);
-  -webkit-mask: linear-gradient(#000 0 56%, transparent 56% 63%, #000 63% 75%, transparent 75% 82%, #000 82%);
-  mask: linear-gradient(#000 0 56%, transparent 56% 63%, #000 63% 75%, transparent 75% 82%, #000 82%);
-  transition: transform .8s var(--ease-back);
-}
-.brand:hover .brand__mark { transform: translateY(-3px) rotate(-12deg); }
-.brand__word {
-  display: inline-flex; align-items: baseline; gap: 6px;
-  font-family: var(--f-display); font-weight: 700; font-stretch: var(--wide);
-  font-size: 1.12rem; line-height: 1; letter-spacing: .01em; text-transform: uppercase;
-}
-.brand__word small {
-  font-family: var(--f-sans); font-weight: 600;
-  font-size: .58rem; letter-spacing: .24em; text-transform: uppercase;
-  color: var(--muted);
-}
+.brand__logo { display: block; height: 34px; width: auto; transition: transform .6s var(--ease); }
+.brand:hover .brand__logo { transform: translateY(-1px); }
 
 .nav { display: none; }
 .header__end { display: flex; align-items: center; gap: 10px; }
@@ -399,7 +383,7 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .brands__list { display: grid; }
 .brand-item { border-bottom: 1px solid var(--line); }
 .brand-item:first-child { border-top: 1px solid var(--line); }
-.brand-item button {
+.brand-item > button, .brand-item > a {
   width: 100%;
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
   padding: 12px 0;
@@ -773,21 +757,8 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .footer__cols ul { display: grid; gap: 6px; font-size: .95rem; color: rgba(244, 239, 230, .86); }
 .footer__cols a { transition: color .3s; }
 .footer__cols a:hover { color: var(--accent-soft); }
-.footer__word {
-  display: flex; align-items: center; gap: .08em;
-  font-family: var(--f-display); font-weight: 900; font-stretch: var(--wide);
-  font-size: clamp(3rem, 15.5vw, 12.5rem); line-height: .9; letter-spacing: -.02em;
-  text-transform: uppercase;
-  color: var(--graphite-3);
-  user-select: none;
-  margin-left: -.04em;
-}
-.footer__sun {
-  width: .62em; height: .62em; border-radius: 50%; flex: none;
-  background: var(--accent);
-  -webkit-mask: linear-gradient(#000 0 56%, transparent 56% 63%, #000 63% 75%, transparent 75% 82%, #000 82%);
-  mask: linear-gradient(#000 0 56%, transparent 56% 63%, #000 63% 75%, transparent 75% 82%, #000 82%);
-}
+.footer__word { margin-top: 8px; user-select: none; }
+.footer__word img { width: 100%; height: auto; opacity: .1; }
 .footer__legal { display: grid; gap: 6px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line-inv); font-size: .8rem; color: rgba(244, 239, 230, .55); }
 
 /* ---------- 16. Dock (accesos fijos) ---------- */
@@ -1052,6 +1023,44 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius
 
 .head--row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
 .title--sm { font-size: clamp(1.7rem, 6.4vw, 3rem); margin-top: 0; }
+
+/* ---------- 23. Etapa 3: local, marcas y entrega ---------- */
+.storefront { display: grid; gap: 14px; }
+.storefront img { width: 100%; height: auto; border-radius: var(--r); background: var(--ivory); }
+.storefront figcaption { display: grid; gap: 2px; font-size: .92rem; color: var(--muted); }
+.storefront figcaption strong { color: var(--text); font-weight: 600; font-size: 1rem; }
+.storefront .label { margin-bottom: 4px; }
+
+.brand-item--ask .brand-item__name { color: var(--text); }
+.brand-item--ask .brand-item__count { color: var(--accent-ink); }
+
+.input {
+  width: 100%; min-height: 52px; padding: 12px 16px;
+  border: 1px solid var(--line-strong); border-radius: var(--r);
+  background: var(--white); font-size: 1rem;
+  transition: border-color .3s, box-shadow .3s;
+}
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
+.field__opt { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.field__hint { font-size: .84rem; color: var(--muted); min-height: 1.2em; }
+
+.money {
+  display: flex; align-items: center;
+  border: 1px solid var(--line-strong); border-radius: var(--r);
+  background: var(--white);
+  transition: border-color .3s, box-shadow .3s;
+}
+.money:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
+.money__sign { padding-left: 16px; font-family: var(--f-display); font-size: 1.3rem; color: var(--muted); }
+.money input {
+  flex: 1; min-width: 0; min-height: 58px; padding: 10px 16px 10px 8px;
+  border: 0; background: transparent; outline: none;
+  font-family: var(--f-display); font-size: 1.5rem; font-variant-numeric: tabular-nums;
+}
+.money input::placeholder { color: var(--stone-2); }
+.money__quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.money__quick .chip sup { color: var(--accent-ink); }
+.field--amount { animation: riseIn .5s var(--ease) both; }
 
 /* Imagen que no cargó: se oculta y queda la ilustración de fondo */
 img.is-broken { opacity: 0 !important; }

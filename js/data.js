@@ -9,6 +9,7 @@
    - Precios: valores de referencia para evaluar el diseño (config.demo).
    - Financiación y promociones: textos genéricos. Reemplazar por las
      condiciones REALES que defina el negocio antes de publicar.
+   - Contacto, dirección y horarios: datos reales del local.
    - Fotos de motos: material oficial publicado por cada marca (Honda
      Motos Argentina, Zanella, Corven y Guerrero), guardado en
      /assets/images/motos/<id>/. Confirmar con cada distribuidor el uso
@@ -21,17 +22,18 @@
 
   const config = {
     nombre: 'Solari Motos',
+    eslogan: 'Tu moto en cuotas',
     // Muestra la marca "Referencia" junto a precios y condiciones de ejemplo.
     demo: true,
-    // WhatsApp en formato internacional, sin "+" ni espacios (PROVISORIO)
-    whatsapp: '5493790000000',
-    whatsappVisible: '+54 9 379 000-0000',
-    telefono: '+54 379 000-0000',
-    email: 'hola@solarimotos.com.ar',
-    direccion: 'Dirección a confirmar',
-    localidad: 'Tu localidad',
+    // WhatsApp de la encargada, en formato internacional sin "+" ni espacios
+    whatsapp: '5493773450740',
+    whatsappVisible: '+54 9 3773 45-0740',
+    telefono: '+54 9 3773 45-0740',
+    direccion: 'Av. San Martín, entre Tucumán y Rioja · Local 2',
+    localidad: 'Mariano I. Loza',
+    departamento: 'Mercedes',
     provincia: 'Corrientes',
-    mapaQuery: 'Corrientes, Argentina',
+    mapaQuery: 'Avenida San Martín y Tucumán, Mariano I. Loza, Corrientes, Argentina',
     // 0 = domingo … 6 = sábado. Rangos en formato 24 h.
     horarios: {
       1: [['08:00', '12:00'], ['16:30', '20:30']],
@@ -39,18 +41,22 @@
       3: [['08:00', '12:00'], ['16:30', '20:30']],
       4: [['08:00', '12:00'], ['16:30', '20:30']],
       5: [['08:00', '12:00'], ['16:30', '20:30']],
-      6: [['08:30', '12:30']],
+      6: [['08:00', '12:00'], ['16:30', '20:30']],
       0: []
     },
+    // Texto de horarios: `dias` indica qué días resalta como "hoy".
     horariosTexto: [
-      ['Lunes a viernes', '8:00–12:00 · 16:30–20:30'],
-      ['Sábados', '8:30–12:30'],
-      ['Domingos', 'Cerrado']
+      { dias: [1, 2, 3, 4, 5, 6], texto: 'Lunes a sábado', horario: '8:00–12:00 · 16:30–20:30' },
+      { dias: [0], texto: 'Domingos', horario: 'Cerrado' }
     ],
+    // Completar con las direcciones reales; si quedan vacías no se muestran.
     redes: {
-      instagram: 'https://instagram.com/',
-      facebook: 'https://facebook.com/'
+      instagram: '',
+      facebook: ''
     },
+    // Marcas con las que trabaja el local (vidriera). Las marcas de las motos
+    // cargadas en el catálogo se suman solas.
+    marcas: ['Honda', 'Zanella', 'Corven', 'Keller', 'Bajaj', 'Kymco', 'Mondial'],
     mensajeWhatsApp: 'Hola Solari Motos, quiero hacer una consulta.',
     // Foto vertical del inicio (opcional). Si falta, se usa la principal de la primera moto.
     heroImagen: 'assets/images/motos/honda-xr-150l/hero.webp'
@@ -174,6 +180,8 @@
     medios: ['Efectivo', 'Transferencia', 'Débito', 'Tarjetas de crédito', 'Crédito personal'],
     // Opciones que la persona puede elegir al armar su consulta.
     entregaOpciones: ['Sin entrega', 'Con entrega'],
+    // Monto sugerido al elegir "Con entrega" (se puede escribir cualquier valor).
+    entregaSugerida: 500000,
     cuotasOpciones: [6, 12, 18, 24],
     // Coeficientes REALES por plan, ej.: { 12: 1.45 }. En null no se muestra
     // ningún monto estimado: la cuota se informa por WhatsApp.

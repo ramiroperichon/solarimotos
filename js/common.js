@@ -73,10 +73,18 @@
   }
   const reveal = (els, opts) => observe(els, (el) => el.classList.add('is-in'), opts);
 
+  /* Marcas con motos en el inventario (para filtros) */
   function brandList(list = DATA.motos) {
     const map = new Map();
     list.forEach((m) => map.set(m.marca, (map.get(m.marca) || 0) + 1));
     return Array.from(map, ([marca, n]) => ({ marca, n }));
+  }
+  /* Todas las marcas del local: primero las que tienen motos cargadas */
+  function allBrands() {
+    const inv = brandList();
+    const names = inv.map((b) => b.marca);
+    (CFG.marcas || []).forEach((m) => { if (!names.includes(m)) inv.push({ marca: m, n: 0 }); });
+    return inv;
   }
 
   /* ---------- Tarjeta de moto ----------
@@ -174,8 +182,7 @@
       <header class="site-header" data-header>
         <div class="container header__inner">
           <a class="brand" href="${isHome ? '#inicio' : 'index.html'}" aria-label="Solari Motos, ir al inicio">
-            <span class="brand__mark" aria-hidden="true"></span>
-            <span class="brand__word">Solari<small>Motos</small></span>
+            <img class="brand__logo" src="assets/images/logo/solari-motos-grafito.svg" alt="Solari Motos" width="160" height="61">
           </a>
           <nav class="nav" aria-label="Navegación principal">
             <ul class="nav__list">
@@ -227,13 +234,13 @@
             </div>
             <div>
               <h3 class="footer__h">Visitanos</h3>
-              <ul><li data-address></li><li data-place></li></ul>
+              <ul><li data-address></li><li data-place></li><li><a href="#" data-wa target="_blank" rel="noopener" data-wa-visible></a></li></ul>
             </div>
             <div>
               <h3 class="footer__h">Horarios</h3>
               <ul data-footer-hours></ul>
             </div>
-            <div>
+            <div data-socials-block>
               <h3 class="footer__h">Seguinos</h3>
               <ul>
                 <li><a href="#" data-social="instagram" target="_blank" rel="noopener">Instagram</a></li>
@@ -241,7 +248,7 @@
               </ul>
             </div>
           </div>
-          <div class="footer__word" aria-hidden="true"><span class="footer__sun"></span>Solari</div>
+          <div class="footer__word" aria-hidden="true"><img src="assets/images/logo/solari-motos-blanco.svg" alt="" width="1200" height="459" loading="lazy"></div>
           <div class="footer__legal">
             <p>© <span data-year></span> Solari Motos · <span data-province></span>, Argentina</p>
             <p>Precios y condiciones sujetos a cambios.</p>
@@ -258,14 +265,24 @@
 
   /* ---------- Datos fijos ---------- */
   function schedule() {
-    const now = new Date();
-    const day = now.getDay();
-    const mins = now.getHours() * 60 + now.getMinutes();
+    // Hora del local (Argentina), sin importar dónde esté quien visita la web
+    let day, mins;
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+        .formatToParts(new Date()).reduce((o, p) => ({ ...o, [p.type]: p.value }), {});
+      day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(parts.weekday);
+      mins = Number(parts.hour) * 60 + Number(parts.minute);
+    } catch (e) {
+      const now = new Date();
+      day = now.getDay();
+      mins = now.getHours() * 60 + now.getMinutes();
+    }
     const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
     const ranges = CFG.horarios[day] || [];
     const open = ranges.some(([a, b]) => mins >= toMin(a) && mins < toMin(b));
     const today = ranges.length ? ranges.map(([a, b]) => `${a}–${b}`).join(' · ') : 'cerrado';
-    return { open, today, group: day === 0 ? 2 : day === 6 ? 1 : 0 };
+    const group = CFG.horariosTexto.findIndex((h) => (h.dias || []).includes(day));
+    return { open, today, group };
   }
 
   function fillStatic() {
@@ -278,7 +295,13 @@
     $$('[data-province]').forEach((el) => { el.textContent = CFG.provincia; });
     $$('[data-phone]').forEach((a) => { a.href = `tel:${CFG.telefono.replace(/[^\d+]/g, '')}`; });
     $$('[data-phone-text]').forEach((a) => { a.textContent = CFG.telefono; });
-    $$('[data-social]').forEach((a) => { a.href = CFG.redes[a.dataset.social] || '#'; });
+    // Redes: si no hay dirección cargada, se oculta el enlace
+    $$('[data-social]').forEach((a) => {
+      const url = CFG.redes && CFG.redes[a.dataset.social];
+      if (url) a.href = url;
+      else (a.closest('li') || a).remove();
+    });
+    $$('[data-socials-block]').forEach((el) => { if (!$('[data-social]', el)) el.remove(); });
     $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
     $$('[data-count-motos]').forEach((el) => { el.textContent = `${DATA.motos.length} ${DATA.motos.length === 1 ? 'moto' : 'motos'}`; });
     $$('[data-demo-note]').forEach((el) => { el.hidden = !CFG.demo; });
@@ -291,9 +314,9 @@
     });
     $$('[data-today-hours]').forEach((el) => { el.textContent = `Hoy: ${s.today}`; });
     const dl = $('[data-hours]');
-    if (dl) dl.innerHTML = CFG.horariosTexto.map(([d, h], i) => `<div class="${i === s.group ? 'is-today' : ''}"><dt>${esc(d)}</dt><dd>${esc(h)}</dd></div>`).join('');
+    if (dl) dl.innerHTML = CFG.horariosTexto.map((h, i) => `<div class="${i === s.group ? 'is-today' : ''}"><dt>${esc(h.texto)}</dt><dd>${esc(h.horario)}</dd></div>`).join('');
     const fh = $('[data-footer-hours]');
-    if (fh) fh.innerHTML = CFG.horariosTexto.map(([d, h]) => `<li>${esc(d)}<br><span class="footer__dim">${esc(h)}</span></li>`).join('');
+    if (fh) fh.innerHTML = CFG.horariosTexto.map((h) => `<li>${esc(h.texto)}<br><span class="footer__dim">${esc(h.horario)}</span></li>`).join('');
   }
 
   /* ---------- Titulares divididos en palabras ---------- */
@@ -419,7 +442,7 @@
     DATA, CFG, page, $, $$, esc, fmt, pad, clamp, motionOK, finePointer,
     waLink, fullName, motoMsg, refTag, hasPrice, priceText, detailURL, link,
     STATUS, statusHTML, guard, guardAll, mediaHTML, imgSrc, imgClass, observe, reveal, brandList,
-    motoCard, renderHelmets, splitWords,
+    motoCard, renderHelmets, splitWords, allBrands,
     /* Llamar al final de cada página, después de renderizar su contenido */
     boot() {
       fillStatic();

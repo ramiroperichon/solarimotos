@@ -33,8 +33,9 @@
     "@type": "MotorcycleDealer",
     "name": "Solari Motos",
     "description": "Concesionaria de motos 0km y cascos con alternativas de financiación.",
-    "address": { "@type": "PostalAddress", "addressRegion": "Corrientes", "addressCountry": "AR" },
-    "openingHours": ["Mo-Fr 08:00-12:00", "Mo-Fr 16:30-20:30", "Sa 08:30-12:30"]
+    "telephone": "+54 9 3773 45-0740",
+    "address": { "@type": "PostalAddress", "streetAddress": "Av. San Martín, entre Tucumán y Rioja, Local 2", "addressLocality": "Mariano I. Loza", "addressRegion": "Corrientes", "addressCountry": "AR" },
+    "openingHours": ["Mo-Sa 08:00-12:00", "Mo-Sa 16:30-20:30"]
   }
   </script>
 </head>
@@ -105,7 +106,7 @@
       <div class="container brands__inner">
         <h2 class="label brands__label" id="brands-title" data-reveal>Marcas que trabajamos</h2>
         <ul class="brands__list" data-brands></ul>
-        <p class="brands__more" data-reveal style="--i:3">y más por venir</p>
+        <p class="brands__more" data-reveal style="--i:3">¿Buscás otro modelo de estas marcas? Lo conseguimos a pedido.</p>
       </div>
     </section>
 
@@ -144,7 +145,7 @@
         <header class="head head--split">
           <div>
             <p class="label" data-reveal><span class="label__n">02</span> Financiación</p>
-            <h2 class="title" id="finance-title" data-split>Tu moto, con un plan <em>que se adapte a vos.</em></h2>
+            <h2 class="title" id="finance-title" data-split>Tu moto en cuotas, <em>con un plan a tu medida.</em></h2>
           </div>
           <p class="head__intro" data-reveal style="--i:2">
             Comprar una moto es una decisión importante. Te mostramos las alternativas
@@ -172,10 +173,25 @@
               <div class="segmented" data-b-entrega></div>
             </fieldset>
 
+            <div class="field field--amount" data-b-amount-wrap hidden>
+              <label for="b-amount">¿Cuánto querés entregar?</label>
+              <div class="money">
+                <span class="money__sign" aria-hidden="true">$</span>
+                <input id="b-amount" type="text" inputmode="numeric" autocomplete="off" placeholder="0" data-b-amount aria-describedby="b-amount-hint">
+              </div>
+              <div class="money__quick" data-b-quick></div>
+              <p class="field__hint" id="b-amount-hint" data-b-amount-hint></p>
+            </div>
+
             <fieldset class="field">
               <legend>¿En cuántas cuotas te gustaría?</legend>
               <div class="segmented segmented--wrap" data-b-cuotas></div>
             </fieldset>
+
+            <div class="field">
+              <label for="b-name">Tu nombre <span class="field__opt">(opcional)</span></label>
+              <input class="input" id="b-name" type="text" autocomplete="given-name" placeholder="Para saber cómo llamarte" data-b-name>
+            </div>
 
             <div class="builder__estimate" data-b-estimate hidden></div>
 
@@ -238,9 +254,13 @@
           </h2>
         </div>
 
-        <figure class="photo-slot about__slot" data-reveal="photo">
-          <svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>
-          <figcaption>Espacio reservado para fotos de nuestro local</figcaption>
+        <figure class="storefront about__slot" data-reveal="photo">
+          <img src="assets/images/fachada-solari.svg" alt="Ilustración de la fachada de Solari Motos, con el cartel y la vidriera" width="900" height="640" loading="lazy">
+          <figcaption>
+            <span class="label">Nuestro local</span>
+            <strong data-address></strong>
+            <span data-place></span>
+          </figcaption>
         </figure>
 
         <ol class="values">
@@ -296,7 +316,7 @@
             <li data-reveal style="--i:3">
               <div class="contact__row">
                 <svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>
-                <span class="contact__k">Teléfono y redes</span>
+                <span class="contact__k">Teléfono</span>
                 <span class="contact__v contact__social">
                   <a href="#" data-phone data-phone-text></a>
                   <a href="#" data-social="instagram" target="_blank" rel="noopener" aria-label="Instagram"><svg class="icon" aria-hidden="true"><use href="#i-ig"/></svg></a>

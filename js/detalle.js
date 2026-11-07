@@ -118,7 +118,7 @@
               <a class="link-arrow" href="${S.waLink(`Hola ${CFG.nombre}, quiero saber cómo financiar la ${name}.`)}" target="_blank" rel="noopener">
                 <svg class="icon icon--wa" aria-hidden="true"><use href="#i-wa"/></svg> Consultar financiación
               </a>
-              <a class="link-arrow" href="index.html#financiacion">Ver alternativas</a>
+              <a class="link-arrow" href="index.html?moto=${encodeURIComponent(m.id)}#financiacion">Armar mi plan</a>
             </div>
           </div>
 

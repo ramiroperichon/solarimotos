@@ -8,7 +8,7 @@ Sitio estático (HTML5 + CSS3 + JavaScript puro). No requiere compilación: se a
 - **Dirección:** editorial premium + boutique urbana, sobre fondos claros.
 - **Paleta:** blanco cálido `#fcfaf6` · marfil `#f4efe6` · piedra `#e7e2d9` · grafito `#1f1e1c` · azul Francia `#1b4db8`.
 - **Tipografías:** Dela Gothic One (titulares) · Instrument Sans (textos y datos).
-- **Marca:** sol con dos cortes horizontales + palabra "Solari".
+- **Logo:** recreado en vector a partir del cartel del local (`assets/images/logo/`): versión grafito con la O en azul (web), blanca (fondos oscuros) y naranja original del cartel.
 
 ### Usar Brekid (tipografía comercial)
 
@@ -62,6 +62,6 @@ python3 -m http.server 8000
 - **Cascos:** arreglo `cascos`; con `imagenes: []` se muestra un espacio preparado.
 - **Financiación:** textos genéricos a validar. `coeficientes` en `null` no muestra montos estimados; solo cargar valores reales.
 - **Promociones:** arreglo vacío oculta el bloque. `demo: true` muestra la marca "Ejemplo".
-- **Contacto:** WhatsApp, dirección, localidad, horarios y redes en `config` (hoy son provisorios).
+- **Contacto:** WhatsApp, dirección (Av. San Martín entre Tucumán y Rioja, Local 2, Mariano I. Loza), horarios (lunes a sábado 8–12 y 16:30–20:30) y marcas del local en `config`. Instagram y Facebook se muestran solo si se completan.
 - **Fotos de motos:** hoy son el material oficial que publica cada marca (Honda Motos Argentina, Zanella, Corven y Guerrero), optimizado en WebP dentro de `assets/images/motos/<id>/`. Conviene confirmar con cada distribuidor el uso comercial, o reemplazarlas por fotos propias. En `imagenes`, `estudio('ruta')` muestra la foto entera sobre blanco; una ruta simple la recorta para llenar el marco. Sin fotos se muestra un marcador con el nombre del modelo.
 - **Ficha de cada moto:** `detalle.html?moto=<id>`. Los enlaces viejos `index.html#moto-<id>` redirigen solos.

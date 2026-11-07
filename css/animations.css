@@ -102,9 +102,9 @@
 
   .hero__index a:hover { padding-left: 10px; color: var(--accent-ink); }
 
-  .brands__list:hover .brand-item button { opacity: .28; }
-  .brands__list .brand-item button:hover { opacity: 1; }
-  .brand-item button:hover .brand-item__name { transform: translateX(14px); color: var(--accent); }
+  .brands__list:hover .brand-item > * { opacity: .28; }
+  .brands__list .brand-item > *:hover { opacity: 1; }
+  .brand-item > *:hover .brand-item__name { transform: translateX(14px); color: var(--accent); }
 
   .moto:hover .moto__media img { transform: scale(1.07); }
   .moto:hover .moto__view { transform: none; }
