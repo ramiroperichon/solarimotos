@@ -8,6 +8,7 @@ Sitio estático (HTML5 + CSS3 + JavaScript puro). No requiere compilación: se a
 - **Dirección:** editorial premium + boutique urbana, sobre fondos claros.
 - **Paleta:** blanco cálido `#fcfaf6` · marfil `#f4efe6` · piedra `#e7e2d9` · grafito `#1f1e1c` · azul Francia `#1b4db8`.
 - **Tipografías:** Archivo en ancho expandido (titulares) · Instrument Sans (textos).
+- **Marca:** sol con dos cortes horizontales + palabra "Solari".
 
 ### Usar Brekid (tipografía comercial)
 
@@ -25,7 +26,6 @@ Brekid es una fuente paga de Erifqi Zefont. Si se compra la licencia con uso web
 3. En `:root`, cambiar `--f-display` a `'Brekid', 'Archivo', 'Arial Black', sans-serif;`.
 
 Recomendación: usarla solo en titulares grandes (hero, títulos de sección, logo) y dejar Archivo para modelos, precios y botones.
-- **Marca:** sol con dos cortes horizontales + palabra "Solari".
 
 ## Estructura
 
