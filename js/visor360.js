@@ -120,7 +120,7 @@
       const i = Math.floor(p);
       const f = p - i;
       // Fundido corto en el medio del tramo: mantiene nitidez y suaviza el salto
-      const t = clamp((f - 0.25) / 0.5, 0, 1);
+      const t = clamp((f - 0.35) / 0.3, 0, 1);
       A.style.backgroundPosition = frameX(i);
       B.style.backgroundPosition = frameX((i + 1) % n);
       B.style.opacity = t.toFixed(3);
