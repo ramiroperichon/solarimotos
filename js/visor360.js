@@ -292,7 +292,9 @@
       });
     }
 
-    if ('IntersectionObserver' in window) {
+    if (opts.lazy === false) {
+      start();
+    } else if ('IntersectionObserver' in window) {
       let started = false;
       new IntersectionObserver((entries) => {
         entries.forEach((en) => {

@@ -70,18 +70,21 @@
          ambiente y detalles);
        - estudio('ruta') → se muestra entera sobre fondo blanco (fotos de
          producto con fondo blanco o transparente).
-     vista360 (opcional): tira de cuadros para girar la moto. Hoy solo la
-       publican Honda (12 cuadros). Ver README para generarla.
+     vista360 (opcional): tira de cuadros para girar la moto. Las marcas solo
+       la publican para Honda (12 cuadros). Para cualquier otra moto se arma
+       con fotos propias en herramientas/armar-360.html, que genera los
+       archivos y la línea para pegar acá, ej.:
+       vista360: vista360('zanella-zb-110', 960, 720, 24)
      ficha: ficha técnica oficial agrupada por secciones.
      Fotos y fichas: material oficial publicado por cada marca. */
   const dir = (id) => (n) => `assets/images/motos/${id}/${n}.webp`;
   const estudio = (src) => ({ src, ajuste: 'contener' });
-  const vista360 = (id, ancho, alto) => ({
-    cuadros: 12,
+  const vista360 = (id, ancho, alto, cuadros = 12, ext = 'webp') => ({
+    cuadros,
     ancho,
     alto,
-    sm: `assets/images/motos/${id}/360-sm.webp`,
-    lg: `assets/images/motos/${id}/360-lg.webp`
+    sm: `assets/images/motos/${id}/360-sm.${ext}`,
+    lg: `assets/images/motos/${id}/360-lg.${ext}`
   });
 
   const xr = dir('honda-xr-150l');
@@ -100,7 +103,7 @@
       marca: 'Honda', modelo: 'XR 150L', categoria: 'Trail',
       cilindrada: 149, anio: 2026, precio: 4350000,
       disponibilidad: 'disponible', etiqueta: 'Para todo camino',
-      imagenes: [estudio(xr('01')), xr('02'), xr('03'), xr('04'), xr('05')],
+      imagenes: [estudio(xr('01')), xr('02'), xr('hero'), xr('03'), xr('04'), xr('05'), xr('06'), xr('07'), xr('08'), xr('09')],
       vista360: vista360('honda-xr-150l', 652, 477),
       resumen: 'Robusta y simple de mantener. Va igual de bien en el asfalto del centro que en el camino de tierra.',
       financiacion: 'Con alternativas de financiación',
@@ -135,7 +138,7 @@
       marca: 'Honda', modelo: 'Wave 110 S', categoria: 'Calle',
       cilindrada: 109, anio: 2026, precio: 2650000,
       disponibilidad: 'disponible', etiqueta: 'La de todos los días',
-      imagenes: [estudio(wave('01')), estudio(wave('02')), wave('03')],
+      imagenes: [estudio(wave('01')), wave('04'), estudio(wave('02')), wave('05'), wave('06'), wave('03'), wave('07'), wave('08'), wave('09')],
       vista360: vista360('honda-wave-110-s', 621, 457),
       resumen: 'Económica, liviana y confiable. La compañera ideal para ir al trabajo, al colegio o hacer mandados.',
       financiacion: 'Con alternativas de financiación',

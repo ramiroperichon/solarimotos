@@ -44,6 +44,8 @@ Recomendación: usarla solo en titulares grandes (hero, títulos de sección, lo
 │   ├── main.js           Inicio
 │   ├── catalogo.js       Filtros, orden y resultados (el estado queda en la URL)
 │   ├── visor360.js       Visor 360° (arrastre, teclado, carga progresiva)
+├── herramientas/
+│   └── armar-360.html    Herramienta interna para armar el 360° con fotos propias
 │   └── detalle.js        Ficha de moto
 └── assets/
     ├── images/           Ilustraciones de respaldo (moto y casco)
@@ -77,5 +79,11 @@ Cada vista es una tira horizontal de 12 cuadros en dos tamaños:
 - `360-sm.webp` (~100 KB): se carga primero, con indicador de progreso.
 - `360-lg.webp` (~230 KB): se descarga después solo si la pantalla la aprovecha y la conexión no es lenta.
 
-Para sumar otra moto: conseguir 12 fotos de estudio tomadas girando la moto (mismo encuadre y fondo blanco),
-unirlas en una tira con el mismo orden y agregar `vista360: vista360('<id>', ancho, alto)`.
+Para sumar el giro a cualquier otra moto (las demás marcas no publican estas fotos):
+
+1. Sacar 12 a 36 fotos (ideal 24) caminando alrededor de la moto, a la misma distancia y altura, siempre en el mismo sentido.
+2. Abrir `herramientas/armar-360.html` (no aparece en la web pública), cargar las fotos, ajustar el encuadre y tocar **Generar archivos**.
+3. Subir los dos archivos a `assets/images/motos/<id>/` y pegar en la moto de `js/data.js` la línea que muestra la herramienta, por ejemplo:
+   `vista360: vista360('zanella-zb-110', 960, 720, 24),`
+
+Todo se procesa en el navegador: las fotos no se envían a ningún servidor.

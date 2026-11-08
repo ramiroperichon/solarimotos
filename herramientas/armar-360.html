@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Armar vista 360° — Herramienta interna · Solari Motos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Instrument+Sans:wdth,wght@85..100,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body { background: var(--ivory); }
+    .tool { max-width: 1100px; margin: 0 auto; padding: 28px var(--gutter) 80px; display: grid; gap: 28px; }
+    .tool__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .tool__top img { height: 34px; width: auto; }
+    .tool h1 { font-family: var(--f-display); font-size: clamp(1.8rem, 6vw, 3rem); line-height: 1; text-transform: uppercase; }
+    .tool h2 { font-family: var(--f-display); font-size: 1.15rem; text-transform: uppercase; margin-bottom: 12px; }
+    .card { background: var(--white); border-radius: var(--r-lg); padding: 22px; display: grid; gap: 14px; }
+    .steps-list { counter-reset: s; display: grid; gap: 10px; }
+    .steps-list li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; color: #3d3a35; }
+    .steps-list li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 700; font-size: .8rem; }
+    .drop {
+      display: grid; place-items: center; gap: 8px; text-align: center;
+      min-height: 160px; padding: 24px; border-radius: var(--r-lg);
+      border: 2px dashed var(--line-strong); background: var(--white);
+      cursor: pointer; transition: border-color .3s, background-color .3s;
+    }
+    .drop.is-over, .drop:hover { border-color: var(--accent); background: var(--accent-wash); }
+    .drop strong { font-size: 1.05rem; }
+    .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+    .thumb { position: relative; border-radius: 6px; overflow: hidden; background: var(--stone); aspect-ratio: 1; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb span { position: absolute; left: 4px; top: 4px; padding: 1px 6px; border-radius: 999px; background: rgba(31,30,28,.8); color: #fff; font-size: .7rem; font-weight: 700; }
+    .thumb .mv { position: absolute; bottom: 4px; display: flex; gap: 4px; left: 4px; right: 4px; justify-content: space-between; }
+    .thumb .mv button { width: 28px; height: 28px; border-radius: 50%; background: rgba(252,250,246,.92); font-weight: 700; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .ctl { display: grid; gap: 6px; min-width: 200px; flex: 1; }
+    .ctl label { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .grid2 { display: grid; gap: 24px; }
+    @media (min-width: 900px) { .grid2 { grid-template-columns: 1.3fr 1fr; align-items: start; } }
+    pre { white-space: pre-wrap; word-break: break-all; background: var(--graphite); color: var(--ivory); padding: 14px; border-radius: var(--r); font-size: .85rem; }
+    .muted { color: var(--muted); font-size: .9rem; }
+    .warn { padding: 12px 14px; border-radius: var(--r); background: #fff4e5; color: #7a4a00; font-size: .9rem; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="tool">
+    <div class="tool__top">
+      <a href="../index.html"><img src="../assets/images/logo/solari-motos-grafito.svg" alt="Solari Motos"></a>
+      <span class="label">Herramienta interna · no aparece en la web</span>
+    </div>
+
+    <header>
+      <h1>Armar vista 360°</h1>
+      <p class="muted" style="margin-top:10px;max-width:60ch">Cargá las fotos de una moto sacadas a su alrededor y esta página arma el giro 360°,
+        lo muestra en vivo y genera los archivos livianos para subir a la web. Todo se procesa en tu celular o computadora: las fotos no se envían a ningún lado.</p>
+    </header>
+
+    <section class="card">
+      <h2>Cómo sacar las fotos</h2>
+      <ol class="steps-list">
+        <li>Poné la moto en un lugar con fondo liso y claro (una pared blanca o el salón vacío) y buena luz pareja, sin sol directo.</li>
+        <li>Marcá en el piso un círculo alrededor de la moto, a unos 3 metros, con 24 marcas (o 12) repartidas parejas. Con cinta o tiza alcanza.</li>
+        <li>Sostené el celular siempre a la misma altura (la del asiento), en horizontal y sin zoom. Si tenés trípode, mejor.</li>
+        <li>Sacá una foto desde cada marca, apuntando al centro de la moto, siempre caminando en el mismo sentido.</li>
+        <li>Cargá todas las fotos acá abajo, en el orden en que las sacaste.</li>
+      </ol>
+    </section>
+
+    <label class="drop" data-drop>
+      <input type="file" accept="image/*" multiple data-files>
+      <strong>Tocá para elegir las fotos o arrastralas acá</strong>
+      <span class="muted">Recomendado: 24 fotos (también funciona con 12 a 36)</span>
+    </label>
+
+    <section class="card" data-work hidden>
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Fotos cargadas <span data-count></span></h2>
+        <div class="row">
+          <button class="btn btn--line btn--sm" type="button" data-reverse>Invertir sentido</button>
+          <button class="btn btn--line btn--sm" type="button" data-clear>Empezar de nuevo</button>
+        </div>
+      </div>
+      <p class="warn" data-warn hidden></p>
+      <div class="thumbs" data-thumbs></div>
+    </section>
+
+    <div class="grid2" data-work hidden>
+      <section class="card">
+        <h2>Vista previa</h2>
+        <div data-preview></div>
+        <p class="muted">Probala igual que en la web: arrastrá con el dedo o el mouse.</p>
+      </section>
+
+      <section class="card">
+        <h2>Ajustes</h2>
+        <div class="ctl">
+          <label for="zoom">Acercar <output data-zoom-out>100%</output></label>
+          <input type="range" id="zoom" min="100" max="180" step="2" value="100" data-zoom>
+        </div>
+        <div class="ctl">
+          <label for="offy">Subir / bajar <output data-offy-out>0</output></label>
+          <input type="range" id="offy" min="-25" max="25" step="1" value="0" data-offy>
+        </div>
+        <div class="ctl">
+          <label for="bright">Brillo <output data-bright-out>100%</output></label>
+          <input type="range" id="bright" min="80" max="130" step="2" value="100" data-bright>
+        </div>
+        <div class="ctl">
+          <label for="moto">Moto</label>
+          <div class="select"><select id="moto" data-moto></select></div>
+        </div>
+        <button class="btn btn--accent btn--block" type="button" data-build>Generar archivos</button>
+
+        <div data-result hidden style="display:grid;gap:12px">
+          <p class="muted" data-sizes></p>
+          <div class="row">
+            <a class="btn btn--dark btn--sm" data-dl-sm download>Descargar liviana</a>
+            <a class="btn btn--dark btn--sm" data-dl-lg download>Descargar alta resolución</a>
+          </div>
+          <p class="muted">Subí los dos archivos a <code data-folder></code> y pegá esta línea dentro de la moto en <code>js/data.js</code>:</p>
+          <pre data-code></pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script>
+    /* Íconos que usa el visor (flechas) */
+    document.body.insertAdjacentHTML('afterbegin', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-prev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></symbol><symbol id="i-next" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></symbol></svg>');
+  </script>
+  <script src="../js/visor360.js"></script>
+  <script src="armar-360.js"></script>
+</body>
+</html>
