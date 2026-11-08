@@ -139,6 +139,26 @@
       </div>
     </section>
 
+    <!-- ============ VISTA 360° ============ -->
+    <section class="section spin-section" id="vista-360" aria-labelledby="spin-title" data-spin-section hidden>
+      <div class="container">
+        <header class="head head--split">
+          <div>
+            <p class="label" data-reveal><span class="label__n">360°</span> Mirala de cerca</p>
+            <h2 class="title" id="spin-title" data-split>Girala <em>como en el local.</em></h2>
+          </div>
+          <p class="head__intro" data-reveal style="--i:2">
+            Arrastrá con el dedo o con el mouse para ver la moto desde todos los ángulos,
+            con las fotos oficiales de la marca.
+          </p>
+        </header>
+        <div class="spin__grid">
+          <div class="spin__viewer" data-spin-viewer></div>
+          <div class="spin__info" data-spin-info aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ FINANCIACIÓN ============ -->
     <section class="section finance" id="financiacion" aria-labelledby="finance-title">
       <div class="container">
@@ -343,6 +363,7 @@
 
   <script src="js/data.js" defer></script>
   <script src="js/common.js" defer></script>
+  <script src="js/visor360.js" defer></script>
   <script src="js/main.js" defer></script>
 </body>
 </html>

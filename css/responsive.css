@@ -132,6 +132,8 @@
   .map__frame { min-height: 520px; }
 
   .footer { padding-bottom: 40px; }
+  .spin__grid { grid-template-columns: 1.45fr 1fr; gap: 56px; align-items: center; }
+  .spin__name { font-size: 2.6rem; }
   /* Páginas internas */
   .page-head { padding: calc(var(--header-h) + 48px) 0 64px; }
   .page-head__grid { grid-template-columns: 1.4fr 1fr; align-items: end; column-gap: 64px; }

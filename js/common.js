@@ -38,7 +38,7 @@
   const detailURL = (m) => `detalle.html?moto=${encodeURIComponent(m.id)}`;
   const link = (hash) => (isHome ? `#${hash}` : `index.html#${hash}`);
 
-  const STATUS = { disponible: 'Disponible', ultima: 'Última unidad', pedido: 'A pedido', reservada: 'Reservada' };
+  const STATUS = { disponible: 'Disponible', ultima: 'Última unidad', pedido: 'A pedido', reservada: 'Reservada', consultar: 'Consultar stock' };
   const statusHTML = (s) => `<span class="status status--${esc(s)}">${esc(STATUS[s] || s)}</span>`;
 
   /* Si una foto no carga, se oculta y queda el marcador de fondo */
@@ -97,6 +97,7 @@
           ${mediaHTML(m)}
           ${total ? `<span class="moto__num" aria-hidden="true">${pad(i + 1)}<small>/${pad(total)}</small></span>` : ''}
           ${m.etiqueta ? `<span class="moto__badge">${esc(m.etiqueta)}</span>` : ''}
+          ${m.vista360 ? '<span class="moto__360" title="Tiene vista 360°"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 4 0 1 0 18 0 9 4 0 1 0-18 0" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M17 15l2.5 1.2-1 2.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>360°</span>' : ''}
           <span class="moto__view" aria-hidden="true">Ver ficha <svg class="icon"><use href="#i-arrow"/></svg></span>
         </a>
         <div class="moto__info">

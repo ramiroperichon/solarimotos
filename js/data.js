@@ -63,22 +63,36 @@
   };
 
   /* ---------- Motos ----------
-     disponibilidad: 'disponible' | 'ultima' | 'pedido' | 'reservada'
+     disponibilidad: 'disponible' | 'ultima' | 'pedido' | 'reservada' | 'consultar'
      precio: número (contado) o null para mostrar "Consultar precio".
      imagenes: la primera es la principal. Cada foto puede ser:
        - un texto con la ruta → se recorta para llenar el espacio (fotos de
          ambiente y detalles);
        - estudio('ruta') → se muestra entera sobre fondo blanco (fotos de
          producto con fondo blanco o transparente).
-     Fotos actuales: material oficial publicado por cada marca. */
+     vista360 (opcional): tira de cuadros para girar la moto. Hoy solo la
+       publican Honda (12 cuadros). Ver README para generarla.
+     ficha: ficha técnica oficial agrupada por secciones.
+     Fotos y fichas: material oficial publicado por cada marca. */
   const dir = (id) => (n) => `assets/images/motos/${id}/${n}.webp`;
   const estudio = (src) => ({ src, ajuste: 'contener' });
+  const vista360 = (id, ancho, alto) => ({
+    cuadros: 12,
+    ancho,
+    alto,
+    sm: `assets/images/motos/${id}/360-sm.webp`,
+    lg: `assets/images/motos/${id}/360-lg.webp`
+  });
 
   const xr = dir('honda-xr-150l');
   const wave = dir('honda-wave-110-s');
   const zb = dir('zanella-zb-110');
   const energy = dir('corven-energy-110');
   const trip = dir('guerrero-trip-110');
+  const ld = dir('mondial-ld-110-max-rt');
+  const ns = dir('bajaj-rouser-ns200');
+  const crono = dir('keller-crono-classic-110');
+  const agility = dir('kymco-agility-125');
 
   const motos = [
     {
@@ -87,9 +101,34 @@
       cilindrada: 149, anio: 2026, precio: 4350000,
       disponibilidad: 'disponible', etiqueta: 'Para todo camino',
       imagenes: [estudio(xr('01')), xr('02'), xr('03'), xr('04'), xr('05')],
+      vista360: vista360('honda-xr-150l', 652, 477),
       resumen: 'Robusta y simple de mantener. Va igual de bien en el asfalto del centro que en el camino de tierra.',
       financiacion: 'Con alternativas de financiación',
-      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Ciudad, ruta y tierra'], ['Garantía', 'Oficial de fábrica']]
+      ficha: {
+        Motor: [
+          ['Tipo', '4 tiempos, 2 válvulas, monocilíndrico, OHC, refrigerado por aire'],
+          ['Cilindrada', '149 cc'],
+          ['Relación de compresión', '9,5:1'],
+          ['Alimentación', 'Carburador'],
+          ['Arranque', 'Eléctrico y a patada'],
+          ['Transmisión', 'Cadena, 5 velocidades']
+        ],
+        'Chasis y frenos': [
+          ['Freno delantero', 'Disco de 240 mm con ABS'],
+          ['Freno trasero', 'Tambor de 110 mm'],
+          ['Suspensión delantera', 'Horquilla telescópica, 160 mm de recorrido'],
+          ['Suspensión trasera', 'Monoshock, 149 mm de recorrido'],
+          ['Neumáticos', '90/90-19 adelante · 110/90-17 atrás']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '2.098 × 813 × 1.129 mm'],
+          ['Distancia entre ejes', '1.363 mm'],
+          ['Altura del asiento', '834 mm'],
+          ['Peso en orden de marcha', '131 kg'],
+          ['Tanque', '12 litros']
+        ],
+        Otros: [['Colores', 'Negro, rojo y blanco'], ['Origen', 'Argentina']]
+      }
     },
     {
       id: 'honda-wave-110-s',
@@ -97,9 +136,34 @@
       cilindrada: 109, anio: 2026, precio: 2650000,
       disponibilidad: 'disponible', etiqueta: 'La de todos los días',
       imagenes: [estudio(wave('01')), estudio(wave('02')), wave('03')],
+      vista360: vista360('honda-wave-110-s', 621, 457),
       resumen: 'Económica, liviana y confiable. La compañera ideal para ir al trabajo, al colegio o hacer mandados.',
       financiacion: 'Con alternativas de financiación',
-      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+      ficha: {
+        Motor: [
+          ['Tipo', '4 tiempos, 2 válvulas, monocilíndrico, OHC, refrigerado por aire'],
+          ['Cilindrada', '109 cc'],
+          ['Relación de compresión', '9,0:1'],
+          ['Alimentación', 'Carburador'],
+          ['Arranque', 'Eléctrico'],
+          ['Transmisión', 'Cadena, 4 velocidades']
+        ],
+        'Chasis y frenos': [
+          ['Freno delantero', 'Disco de 220 mm'],
+          ['Freno trasero', 'Tambor de 110 mm, sistema CBS'],
+          ['Suspensión delantera', 'Horquilla telescópica, 81 mm de recorrido'],
+          ['Suspensión trasera', 'Doble amortiguador hidráulico, 81 mm de recorrido'],
+          ['Neumáticos', '70/90-17 adelante · 80/90-17 atrás']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.898 × 702 × 1.086 mm'],
+          ['Distancia entre ejes', '1.227 mm'],
+          ['Altura del asiento', '763 mm'],
+          ['Peso en orden de marcha', '102 kg'],
+          ['Tanque', '3,7 litros']
+        ],
+        Otros: [['Colores', 'Negro, blanco, rojo y gris'], ['Origen', 'Argentina']]
+      }
     },
     {
       id: 'zanella-zb-110',
@@ -107,29 +171,223 @@
       cilindrada: 107, anio: 2026, precio: 1890000,
       disponibilidad: 'ultima', etiqueta: '',
       imagenes: [estudio(zb('01')), estudio(zb('02')), estudio(zb('03')), estudio(zb('04')), zb('05'), zb('06'), zb('07')],
-      resumen: 'Práctica y accesible, pensada para moverse por la ciudad gastando poco.',
+      resumen: 'Práctica y accesible, pensada para moverse por la ciudad gastando poco. Trae puertos USB y porta celular.',
       financiacion: 'Con alternativas de financiación',
-      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+      ficha: {
+        Motor: [
+          ['Tipo', 'Monocilíndrico 4 tiempos, refrigerado por aire'],
+          ['Cilindrada', '107 cc'],
+          ['Potencia', '6,5 HP'],
+          ['Transmisión', 'Manual'],
+          ['Arranque', 'Eléctrico y a patada']
+        ],
+        'Chasis y frenos': [
+          ['Frenos', 'Tambor adelante y atrás, sistema CBS'],
+          ['Suspensión delantera', 'Horquilla telescópica hidráulica'],
+          ['Suspensión trasera', 'Doble amortiguador hidráulico'],
+          ['Neumáticos', '2,50-17" adelante · 2,75-14" atrás'],
+          ['Llantas', 'Rayos']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.860 × 680 × 1.075 mm'],
+          ['Distancia al suelo', '190 mm'],
+          ['Peso en vacío', '88 kg'],
+          ['Capacidad de carga', '140 kg'],
+          ['Tanque', '3,2 litros']
+        ],
+        Otros: [
+          ['Velocidad máxima', '82 km/h'],
+          ['Consumo', '1,8 L cada 100 km'],
+          ['Equipamiento', 'Puertos USB A y C, porta celular, asiento memory foam'],
+          ['Colores', 'Azul, rojo, blanco perla y gris oscuro']
+        ]
+      }
     },
     {
       id: 'corven-energy-110',
       marca: 'Corven', modelo: 'Energy 110 RT', categoria: 'Calle',
-      cilindrada: 107, anio: 2026, precio: 1790000,
+      cilindrada: 110, anio: 2026, precio: 1790000,
       disponibilidad: 'disponible', etiqueta: '',
       imagenes: [estudio(energy('01')), estudio(energy('02')), energy('03'), energy('04')],
-      resumen: 'Una opción económica y rendidora para dar el primer paso a tu propia moto.',
+      resumen: 'Una opción económica y rendidora para dar el primer paso a tu propia moto, con baúl bajo el asiento.',
       financiacion: 'Con alternativas de financiación',
-      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+      ficha: {
+        Motor: [
+          ['Tipo', 'Monocilíndrico 4 tiempos, refrigerado por aire, CDI con avance electrónico'],
+          ['Cilindrada', '110 cc'],
+          ['Arranque', 'Eléctrico y a pedal'],
+          ['Transmisión', '4 velocidades, embrague húmedo multidisco']
+        ],
+        'Chasis y frenos': [
+          ['Frenos', 'Tambor adelante y atrás, sistema CBS'],
+          ['Suspensión delantera', 'Horquilla hidráulica'],
+          ['Suspensión trasera', 'Doble amortiguador hidráulico'],
+          ['Neumáticos', '2,50-17 adelante · 80/100-14 atrás, llantas de rayos']
+        ],
+        'Capacidad': [['Tanque', '4 litros'], ['Guardado', 'Baúl bajo el asiento, biplaza']],
+        Otros: [
+          ['Instrumental', 'Indicador de marcha y de nivel de combustible'],
+          ['Garantía', '12 meses o 12.000 km'],
+          ['Colores', 'Negro, blanco, rojo y azul']
+        ]
+      }
     },
     {
       id: 'guerrero-trip-110',
       marca: 'Guerrero', modelo: 'Trip 110 Full', categoria: 'Calle',
-      cilindrada: 107, anio: 2026, precio: 1750000,
+      cilindrada: 108, anio: 2026, precio: 1750000,
       disponibilidad: 'pedido', etiqueta: '',
       imagenes: [estudio(trip('01')), trip('02'), trip('03'), trip('04'), trip('05'), trip('06')],
-      resumen: 'Sencilla y resistente. Ideal para el uso diario con un costo de mantenimiento bajo.',
+      resumen: 'Sencilla y resistente, con frenos a disco adelante y atrás. Ideal para el uso diario con bajo costo de mantenimiento.',
       financiacion: 'Con alternativas de financiación',
-      ficha: [['Motor', '4 tiempos, monocilíndrico'], ['Uso', 'Urbano'], ['Garantía', 'Oficial de fábrica']]
+      ficha: {
+        Motor: [
+          ['Tipo', 'Monocilíndrico 4 tiempos, refrigerado por aire, 4 marchas'],
+          ['Cilindrada', '108 cc'],
+          ['Arranque', 'Patada y eléctrico'],
+          ['Encendido', 'CDI']
+        ],
+        'Chasis y frenos': [['Frenos', 'Disco adelante y atrás, sistema de freno combinado']],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.900 × 660 × 1.070 mm'],
+          ['Peso en seco', '100 kg'],
+          ['Tanque', '4 litros']
+        ]
+      }
+    },
+    {
+      id: 'mondial-ld-110-max-rt',
+      marca: 'Mondial', modelo: 'LD 110 Max RT', categoria: 'Calle',
+      cilindrada: 110, anio: 2026, precio: null,
+      disponibilidad: 'consultar', etiqueta: '',
+      imagenes: [estudio(ld('01')), estudio(ld('02')), ld('03'), ld('04'), ld('05')],
+      resumen: 'Diseño moderno, bajo consumo y un andar suave. Trae baúl amplio, puerto USB, frenos CBS y luces LED.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: {
+        Motor: [
+          ['Tipo', 'Monocilíndrico 4 tiempos, CDI con avance electrónico'],
+          ['Cilindrada', '110 cc'],
+          ['Potencia máxima', '7 HP a 7.500 rpm'],
+          ['Refrigeración', 'Aire'],
+          ['Alimentación', 'Carburador, Euro 2'],
+          ['Transmisión', '4 velocidades, embrague semiautomático'],
+          ['Arranque', 'Eléctrico y pedal de arranque']
+        ],
+        'Chasis y frenos': [
+          ['Frenos', 'Tambor adelante y atrás, sistema CBS'],
+          ['Neumáticos', '2,25-17 adelante · 80/100-14 atrás, llantas de rayos']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.900 × 660 × 1.070 mm'],
+          ['Despeje del piso', '140 mm'],
+          ['Peso neto', '92 kg'],
+          ['Tanque', '3 litros']
+        ],
+        Otros: [
+          ['Equipamiento', 'Baúl bajo asiento, puerto USB A-C, luces LED'],
+          ['Colores', 'Gris nardo, azul, blanco y negro']
+        ]
+      }
+    },
+    {
+      id: 'bajaj-rouser-ns200',
+      marca: 'Bajaj', modelo: 'Rouser NS200', categoria: 'Naked',
+      cilindrada: 200, anio: 2026, precio: null,
+      disponibilidad: 'consultar', etiqueta: 'Más potencia',
+      imagenes: [estudio(ns('01')), estudio(ns('02')), ns('03'), ns('04'), ns('05')],
+      resumen: 'La naked deportiva de Bajaj: motor de refrigeración líquida, frenos a disco, luces full LED y tablero con Bluetooth y GPS giro a giro.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: {
+        Motor: [
+          ['Tipo', 'Monocilíndrico 4 tiempos, SOHC, 4 válvulas, triple bujía, refrigeración líquida'],
+          ['Cilindrada', '200 cc'],
+          ['Potencia', '23,5 HP a 9.500 rpm'],
+          ['Torque', '18,3 Nm a 8.000 rpm'],
+          ['Embrague', 'Antirrebote']
+        ],
+        'Chasis y frenos': [
+          ['Freno delantero', 'Disco de 300 mm'],
+          ['Freno trasero', 'Disco de 230 mm'],
+          ['Suspensión delantera', 'Horquilla telescópica'],
+          ['Suspensión trasera', 'Monoshock nitrox'],
+          ['Neumáticos', '100/80-17 adelante · 130/70-17 atrás']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '2.017 × 803 × 1.195 mm'],
+          ['Distancia entre ejes', '1.363 mm'],
+          ['Peso neto', '158 kg'],
+          ['Tanque', '12 litros']
+        ],
+        Otros: [['Tablero', 'Digital con Bluetooth, GPS giro a giro y puerto USB'], ['Iluminación', 'Full LED']]
+      }
+    },
+    {
+      id: 'keller-crono-classic-110',
+      marca: 'Keller', modelo: 'Crono Classic Full 110', categoria: 'Calle',
+      cilindrada: 107, anio: 2026, precio: null,
+      disponibilidad: 'consultar', etiqueta: '',
+      imagenes: [estudio(crono('01')), estudio(crono('02')), estudio(crono('03')), estudio(crono('04')), crono('05'), crono('06'), crono('07')],
+      resumen: 'Clásica, liviana y con freno a disco hidráulico adelante. Llantas de aleación y capacidad de carga de 150 kg.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: {
+        Motor: [
+          ['Tipo', 'SOHC, refrigerado por aire'],
+          ['Cilindrada', '107 cc'],
+          ['Potencia neta', '7 HP a 8.000 rpm'],
+          ['Alimentación', 'Carburador de 19 mm'],
+          ['Arranque', 'Eléctrico y a patada'],
+          ['Transmisión', '4 velocidades, cadena, embrague semiautomático'],
+          ['Emisiones', 'Euro 2']
+        ],
+        'Chasis y frenos': [
+          ['Freno delantero', 'Disco de 220 mm, hidráulico'],
+          ['Freno trasero', 'Tambor de 110 mm'],
+          ['Suspensión delantera', 'Horquilla telescópica hidráulica'],
+          ['Suspensión trasera', 'Doble amortiguador'],
+          ['Neumáticos', '2,50-17" adelante · 80/100-14" atrás'],
+          ['Llantas', 'Aleación liviana']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.860 × 700 × 1.100 mm'],
+          ['Distancia entre ejes', '1.260 mm'],
+          ['Altura del asiento', '760 mm'],
+          ['Peso en seco', '89 kg'],
+          ['Capacidad de carga', '150 kg'],
+          ['Tanque', '4 litros']
+        ],
+        Otros: [['Colores', 'Rojo, negro, azul y plata']]
+      }
+    },
+    {
+      id: 'kymco-agility-125',
+      marca: 'Kymco', modelo: 'Agility 125', categoria: 'Scooter',
+      cilindrada: 125, anio: 2026, precio: null,
+      disponibilidad: 'consultar', etiqueta: 'Automática',
+      imagenes: [estudio(agility('01')), agility('02'), agility('03'), agility('04'), agility('05')],
+      resumen: 'Scooter automático, cómodo y fácil de manejar. Freno a disco hidráulico, baulera bajo el asiento y 2 años de garantía.',
+      financiacion: 'Con alternativas de financiación',
+      ficha: {
+        Motor: [
+          ['Tipo', 'OHC 4 tiempos, monocilíndrico, refrigeración por aire forzado'],
+          ['Cilindrada', '125 cc'],
+          ['Potencia máxima', '8,4 HP a 7.500 rpm'],
+          ['Alimentación', 'Carburador'],
+          ['Transmisión', 'Automática CVT'],
+          ['Arranque', 'Eléctrico']
+        ],
+        'Chasis y frenos': [
+          ['Freno delantero', 'Disco hidráulico'],
+          ['Freno trasero', 'Tambor de 110 mm'],
+          ['Neumáticos', '90/90-12 adelante · 3,50-10 atrás']
+        ],
+        'Dimensiones y peso': [
+          ['Largo × ancho × alto', '1.860 × 670 × 1.130 mm'],
+          ['Altura del asiento', '760 mm'],
+          ['Peso', '96 kg'],
+          ['Tanque', '5,5 litros']
+        ],
+        Otros: [['Asiento', 'Biplaza con baulera'], ['Garantía', '2 años o 20.000 km, transferible']]
+      }
     }
   ];
 

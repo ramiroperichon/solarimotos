@@ -43,6 +43,7 @@ Recomendación: usarla solo en titulares grandes (hero, títulos de sección, lo
 │   ├── common.js         Encabezado, menú, pie, tarjetas y utilidades compartidas
 │   ├── main.js           Inicio
 │   ├── catalogo.js       Filtros, orden y resultados (el estado queda en la URL)
+│   ├── visor360.js       Visor 360° (arrastre, teclado, carga progresiva)
 │   └── detalle.js        Ficha de moto
 └── assets/
     ├── images/           Ilustraciones de respaldo (moto y casco)
@@ -65,3 +66,16 @@ python3 -m http.server 8000
 - **Contacto:** WhatsApp, dirección (Av. San Martín entre Tucumán y Rioja, Local 2, Mariano I. Loza), horarios (lunes a sábado 8–12 y 16:30–20:30) y marcas del local en `config`. Instagram y Facebook se muestran solo si se completan.
 - **Fotos de motos:** hoy son el material oficial que publica cada marca (Honda Motos Argentina, Zanella, Corven y Guerrero), optimizado en WebP dentro de `assets/images/motos/<id>/`. Conviene confirmar con cada distribuidor el uso comercial, o reemplazarlas por fotos propias. En `imagenes`, `estudio('ruta')` muestra la foto entera sobre blanco; una ruta simple la recorta para llenar el marco. Sin fotos se muestra un marcador con el nombre del modelo.
 - **Ficha de cada moto:** `detalle.html?moto=<id>`. Los enlaces viejos `index.html#moto-<id>` redirigen solos.
+
+## Vista 360°
+
+Los modelos con `vista360` en `js/data.js` se pueden girar con el dedo, el mouse o las flechas del teclado
+(ficha de la moto y bloque "Girala" del inicio). Hoy la publican Honda (XR 150L y Wave 110 S).
+
+Cada vista es una tira horizontal de 12 cuadros en dos tamaños:
+
+- `360-sm.webp` (~100 KB): se carga primero, con indicador de progreso.
+- `360-lg.webp` (~230 KB): se descarga después solo si la pantalla la aprovecha y la conexión no es lenta.
+
+Para sumar otra moto: conseguir 12 fotos de estudio tomadas girando la moto (mismo encuadre y fondo blanco),
+unirlas en una tira con el mismo orden y agregar `vista360: vista360('<id>', ancho, alto)`.

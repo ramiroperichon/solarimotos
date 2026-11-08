@@ -54,6 +54,16 @@
   });
   document.head.appendChild(ld);
 
+  /* ---------- Ficha técnica: admite lista simple o grupos { 'Motor': [[k, v]] } ---------- */
+  function specsHTML(moto) {
+    const rows = (list) => list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    const general = [['Marca', moto.marca], ['Modelo', moto.modelo], ['Cilindrada', `${moto.cilindrada} cc`], ['Año', String(moto.anio)]];
+    const f = moto.ficha || [];
+    if (Array.isArray(f)) return `<dl class="specs">${rows(general.concat(f))}</dl>`;
+    return `<section class="specs-group"><h3>General</h3><dl class="specs">${rows(general)}</dl></section>` +
+      Object.keys(f).map((g) => `<section class="specs-group"><h3>${esc(g)}</h3><dl class="specs">${rows(f[g])}</dl></section>`).join('');
+  }
+
   /* ---------- Ficha ---------- */
   const thumbs = imgs.length > 1
     ? `<div class="gallery__thumbs" role="group" aria-label="Fotos de la ${esc(name)}">
@@ -78,12 +88,20 @@
 
       <div class="product__grid">
         <div class="product__gallery">
+          ${m.vista360 ? `
+          <div class="gallery-tabs" role="tablist" aria-label="Ver la moto">
+            <button type="button" role="tab" class="tab-360" id="tab-360" aria-controls="panel-360" aria-selected="true" data-tab="360"><b>360°</b> Girala</button>
+            <button type="button" role="tab" id="tab-fotos" aria-controls="panel-fotos" aria-selected="false" data-tab="fotos">Fotos (${imgs.length})</button>
+          </div>
+          <div class="product__spin" id="panel-360" role="tabpanel" aria-labelledby="tab-360" data-panel="360"></div>` : ''}
+          <div id="panel-fotos" ${m.vista360 ? 'role="tabpanel" aria-labelledby="tab-fotos" hidden' : ''} data-panel="fotos">
           <figure class="gallery__main product__photo" data-gallery>
             ${S.mediaHTML(m, 0, { eager: true })}
             ${m.etiqueta ? `<span class="moto__badge">${esc(m.etiqueta)}</span>` : ''}
             ${!imgs.length ? '<figcaption class="product__soon"><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>Fotos del modelo próximamente</figcaption>' : ''}
           </figure>
           ${thumbs}
+          </div>
         </div>
 
         <div class="product__info">
@@ -122,14 +140,11 @@
             </div>
           </div>
 
-          <dl class="specs" data-in style="--d:8">
-            <div><dt>Marca</dt><dd>${esc(m.marca)}</dd></div>
-            <div><dt>Modelo</dt><dd>${esc(m.modelo)}</dd></div>
-            <div><dt>Cilindrada</dt><dd>${m.cilindrada} cc</dd></div>
-            <div><dt>Año</dt><dd>${m.anio}</dd></div>
-            ${(m.ficha || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
-          </dl>
-          <p class="product__note">Datos orientativos. Confirmá especificaciones y colores disponibles con nosotros.</p>
+          <div class="product__specs" data-in style="--d:8">
+            <h2 class="product__specs-title">Ficha técnica</h2>
+            ${specsHTML(m)}
+          </div>
+          <p class="product__note">Ficha técnica según la información oficial publicada por ${esc(m.marca)}. Confirmá especificaciones y colores disponibles con nosotros.</p>
         </div>
       </div>
     </div>`;
@@ -152,6 +167,24 @@
     requestAnimationFrame(() => requestAnimationFrame(() => img.classList.remove('is-out')));
     if (old) { old.classList.add('is-out'); setTimeout(() => old.remove(), motionOK() ? 600 : 0); }
   }));
+
+  /* Vista 360° y pestañas */
+  if (m.vista360 && window.Visor360) {
+    window.Visor360.mount($('[data-panel="360"]', wrap), m.vista360, { nombre: name });
+    const tabs = $$('[data-tab]', wrap);
+    const select = (key) => {
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === key)));
+      $$('[data-panel]', wrap).forEach((p) => { p.hidden = p.dataset.panel !== key; });
+    };
+    tabs.forEach((t) => t.addEventListener('click', () => select(t.dataset.tab)));
+    $('.gallery-tabs', wrap).addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+      const i = tabs.indexOf(document.activeElement);
+      const nx = tabs[(i + 1) % tabs.length];
+      nx.focus();
+      select(nx.dataset.tab);
+    });
+  }
 
   /* El acceso fijo de WhatsApp consulta directamente por este modelo */
   const dockWa = $('[data-dock-wa]');

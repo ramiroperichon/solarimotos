@@ -302,7 +302,54 @@
     frame();
   }
 
+  /* ---------- Vista 360° (solo modelos con cuadros de giro) ---------- */
+  function initSpin() {
+    const section = $('[data-spin-section]');
+    const list = DATA.motos.filter((m) => m.vista360);
+    if (!section || !list.length || !window.Visor360) return;
+    section.hidden = false;
+    const holder = $('[data-spin-viewer]', section);
+    const info = $('[data-spin-info]', section);
+    let viewer = null;
+
+    const fichaValue = (m, key) => {
+      const f = m.ficha || {};
+      const all = Array.isArray(f) ? f : Object.values(f).flat();
+      const row = all.find(([k]) => k.toLowerCase().startsWith(key));
+      return row ? row[1] : '';
+    };
+
+    const show = (id) => {
+      const m = list.find((x) => x.id === id) || list[0];
+      if (viewer) viewer.destroy();
+      viewer = window.Visor360.mount(holder, m.vista360, { nombre: S.fullName(m) });
+      const specs = [
+        ['Cilindrada', `${m.cilindrada} cc`],
+        ['Cambios', ((fichaValue(m, 'transmisión') || '').match(/(\d+)\s*velocidades/) || [])[1] || ''],
+        ['Peso', fichaValue(m, 'peso') || fichaValue(m, 'peso en orden')]
+      ].filter(([, v]) => v);
+      info.innerHTML = `
+        ${list.length > 1 ? `<div class="spin__switch" role="group" aria-label="Elegí el modelo">
+          ${list.map((x) => `<button type="button" class="chip" data-spin="${esc(x.id)}" aria-pressed="${x.id === m.id}">${esc(S.fullName(x))}</button>`).join('')}
+        </div>` : ''}
+        <p class="label">${esc(m.marca)} · ${esc(m.categoria)}</p>
+        <h3 class="spin__name">${esc(m.modelo)}</h3>
+        <p class="spin__meta">${esc(m.resumen || '')}</p>
+        <dl class="spin__specs">${specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+        <div class="spin__actions">
+          <a class="btn btn--dark" href="${S.detailURL(m)}"><span>Ver ficha completa</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--line" href="${S.waLink(S.motoMsg(m))}" target="_blank" rel="noopener"><svg class="icon icon--wa" aria-hidden="true"><use href="#i-wa"/></svg><span>Consultar</span></a>
+        </div>`;
+    };
+    info.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-spin]');
+      if (b && b.getAttribute('aria-pressed') !== 'true') show(b.dataset.spin);
+    });
+    show(list[0].id);
+  }
+
   initHero();
+  initSpin();
   initBrands();
   Collection.init();
   initFinance();
