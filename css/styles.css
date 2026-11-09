@@ -1180,5 +1180,10 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius
 .specs-group h3 { font-family: var(--f-display); font-size: .95rem; letter-spacing: .02em; text-transform: uppercase; margin-bottom: 6px; }
 .status--consultar { --st: #8a857c; }
 
+/* Acceso interno del personal: casi invisible, aparece al pasar el mouse o con el teclado */
+.footer__staff { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-left: 6px; vertical-align: middle; opacity: .12; color: inherit; border-radius: 50%; transition: opacity .4s; }
+.footer__staff svg { width: 13px; height: 13px; }
+.footer__staff:hover, .footer__staff:focus-visible { opacity: .9; }
+
 /* Imagen que no cargó: se oculta y queda la ilustración de fondo */
 img.is-broken { opacity: 0 !important; }

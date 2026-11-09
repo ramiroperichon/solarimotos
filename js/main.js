@@ -3,7 +3,8 @@
    Usa los componentes compartidos de js/common.js (window.Solari).
    ========================================================================== */
 
-(function () {
+/* Espera a que lleguen los datos (Supabase o respaldo) antes de dibujar */
+window.SolariData.ready.then(function () {
   'use strict';
 
   const S = window.Solari;
@@ -357,4 +358,4 @@
   initMap();
   initScrollMotion();
   S.boot();
-})();
+});

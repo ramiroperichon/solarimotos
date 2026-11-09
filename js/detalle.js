@@ -2,7 +2,8 @@
    SOLARI MOTOS — Ficha de moto (detalle.html?moto=<id>)
    ========================================================================== */
 
-(function () {
+/* Espera a que lleguen los datos (Supabase o respaldo) antes de dibujar */
+window.SolariData.ready.then(function () {
   'use strict';
 
   const S = window.Solari;
@@ -206,4 +207,4 @@
   }
 
   S.boot();
-})();
+});

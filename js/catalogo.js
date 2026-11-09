@@ -5,7 +5,8 @@
    compartir una búsqueda.
    ========================================================================== */
 
-(function () {
+/* Espera a que lleguen los datos (Supabase o respaldo) antes de dibujar */
+window.SolariData.ready.then(function () {
   'use strict';
 
   const S = window.Solari;
@@ -252,4 +253,4 @@
   stickyShadow();
   S.renderHelmets($('[data-helmets]'));
   S.boot();
-})();
+});

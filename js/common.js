@@ -6,7 +6,8 @@
    Cada página declara <body data-page="home|catalogo|detalle">.
    ========================================================================== */
 
-(function () {
+/* Espera a que lleguen los datos (Supabase o respaldo) antes de dibujar */
+window.SolariData.ready.then(function () {
   'use strict';
 
   const DATA = window.SolariData.get();
@@ -252,7 +253,11 @@
           <div class="footer__word" aria-hidden="true"><img src="assets/images/logo/solari-motos-blanco.svg" alt="" width="1200" height="459" loading="lazy"></div>
           <div class="footer__legal">
             <p>© <span data-year></span> Solari Motos · <span data-province></span>, Argentina</p>
-            <p>Precios y condiciones sujetos a cambios.</p>
+            <p>Precios y condiciones sujetos a cambios.
+              <a class="footer__staff" href="${esc((window.SOLARI_SUPABASE && window.SOLARI_SUPABASE.panel) || '#')}" rel="nofollow noopener" aria-label="Acceso interno del personal" title="Acceso interno">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </a>
+            </p>
           </div>
         </div>
       </footer>
@@ -455,4 +460,4 @@
       start();
     }
   };
-})();
+});

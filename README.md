@@ -87,3 +87,39 @@ Para sumar el giro a cualquier otra moto (las demás marcas no publican estas fo
    `vista360: vista360('zanella-zb-110', 960, 720, 24),`
 
 Todo se procesa en el navegador: las fotos no se envían a ningún servidor.
+
+## Panel de administración (`admin/`)
+
+Panel interno para editar motos, cascos, promociones y datos del local. Se publica en el subdominio
+`admin.solarimotos.com.ar` (ver `vercel.json`). En la web pública hay un acceso casi invisible
+(candado en el pie de página).
+
+### Seguridad
+
+- **Contraseñas**: las gestiona Supabase Auth (bcrypt con sal por usuario). El código nunca las guarda.
+- **Lista blanca**: solo los emails de `privado.emails_autorizados` pueden crear cuenta (lo bloquea la base).
+- **Doble factor obligatorio (TOTP)**: sin código del autenticador la base rechaza toda escritura (RLS nivel AAL2).
+- **RLS forzado** en todas las tablas: el público solo lee lo publicado; la auditoría no se puede editar ni borrar.
+- **Sesión**: flujo PKCE, cierre a los 15 min de inactividad y vida máxima de 8 h.
+- **Navegador**: CSP estricta, sin scripts de terceros (supabase-js incluido en `admin/vendor/` con SRI), HSTS,
+  `frame-ancestors 'none'`, `noindex`.
+
+### Base de datos (`supabase/`)
+
+- `migrations/001_esquema_seguridad_base.sql` — aplicada.
+- `migrations/002_permisos_en_esquema_privado.sql` — **pendiente**: habilita la lectura pública del catálogo
+  y saca de la API las funciones de permisos. Aplicarla en Supabase → SQL Editor.
+- `seed.sql` — carga inicial del contenido (ya aplicada).
+
+La web pública lee el catálogo de Supabase; si no responde usa la última copia del navegador o `js/data.js`.
+
+### Sumar otra persona al panel
+
+En Supabase → SQL Editor:
+
+```sql
+insert into privado.emails_autorizados (email, nombre) values ('email@ejemplo.com', 'Nombre');
+```
+
+Después esa persona entra al panel, toca "Crear mi cuenta" y activa su doble factor.
+Para quitarle el acceso: `update privado.admins set activo = false where email = 'email@ejemplo.com';`

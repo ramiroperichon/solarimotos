@@ -458,7 +458,73 @@
     { id: 'promo-contado', titulo: 'Beneficio de contado', texto: 'Precio especial pagando en efectivo o transferencia.', vigencia: 'Vigencia a confirmar', demo: true }
   ];
 
+  /* ---------- Datos desde Supabase (lo que se edita en el panel) ----------
+     1. Se piden a Supabase con un tiempo máximo de espera.
+     2. Si falla, se usa la última copia guardada en el navegador.
+     3. Si tampoco hay copia, se usan los datos de este archivo.
+     Así la web nunca queda vacía, aunque la base no responda. */
+  const base = { config, motos, cascos, financiacion, promociones };
+  let datos = base;
+  let origen = 'archivo';
+  const CACHE = 'solari:datos:v1';
+  const ESPERA_MS = 3000;
+
+  const limpiarFila = (f) => {
+    const out = { ...f };
+    ['creado', 'actualizado', 'actualizado_por', 'publicado', 'orden'].forEach((k) => delete out[k]);
+    if (out.precio !== null && out.precio !== undefined) out.precio = Number(out.precio);
+    if (out.vista360 === null) delete out.vista360;
+    return out;
+  };
+
+  function combinar(r) {
+    const sitio = (r.sitio && r.sitio[0]) || {};
+    return {
+      // La configuración remota se combina con la local: un campo faltante nunca rompe la web
+      config: { ...config, ...(sitio.config || {}) },
+      financiacion: { ...financiacion, ...(sitio.financiacion || {}) },
+      motos: r.motos.map(limpiarFila),
+      cascos: r.cascos.map(limpiarFila),
+      promociones: r.promociones.map(limpiarFila)
+    };
+  }
+
+  function pedirRemoto() {
+    const sb = window.SOLARI_SUPABASE;
+    if (!sb || !sb.url || !window.fetch) return Promise.reject(new Error('sin configuración'));
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = setTimeout(() => ctrl && ctrl.abort(), ESPERA_MS);
+    const opts = { headers: { apikey: sb.clave, Accept: 'application/json' }, signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' };
+    const get = (q) => fetch(`${sb.url}/rest/v1/${q}`, opts).then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    });
+    return Promise.all([
+      get('motos?select=*&order=orden.asc,id.asc'),
+      get('cascos?select=*&order=orden.asc,id.asc'),
+      get('promociones?select=*&order=orden.asc,id.asc'),
+      get('sitio?select=config,financiacion&id=eq.1')
+    ]).then(([m, c, p, s]) => {
+      clearTimeout(timer);
+      if (!Array.isArray(m) || !m.length) throw new Error('catálogo vacío');
+      return combinar({ motos: m, cascos: c, promociones: p, sitio: s });
+    }).catch((e) => { clearTimeout(timer); throw e; });
+  }
+
+  const leerCache = () => { try { return JSON.parse(localStorage.getItem(CACHE)); } catch (e) { return null; } };
+  const guardarCache = (d) => { try { localStorage.setItem(CACHE, JSON.stringify(d)); } catch (e) { /* sin espacio o bloqueado */ } };
+
+  const ready = pedirRemoto()
+    .then((d) => { datos = d; origen = 'supabase'; guardarCache(d); })
+    .catch(() => {
+      const c = leerCache();
+      if (c && Array.isArray(c.motos) && c.motos.length) { datos = c; origen = 'copia'; }
+    })
+    .then(() => datos);
+
   window.SolariData = {
-    get() { return { config, motos, cascos, financiacion, promociones }; }
+    get() { return datos; },
+    ready,
+    origen: () => origen
   };
 })();

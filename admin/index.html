@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://fscriiqeyobkvujlgmjw.supabase.co https://www.solarimotos.com.ar; connect-src 'self' https://fscriiqeyobkvujlgmjw.supabase.co wss://fscriiqeyobkvujlgmjw.supabase.co; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <title>Panel · Solari Motos</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fscriiqeyobkvujlgmjw.supabase.co" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <noscript><p class="noscript">El panel necesita JavaScript activado.</p></noscript>
+
+  <!-- ===== Acceso ===== -->
+  <main class="auth" data-view="auth" hidden>
+    <div class="auth__card">
+      <img class="auth__logo" src="logo.svg" alt="Solari Motos" width="180" height="69">
+      <p class="auth__tag">Panel interno</p>
+
+      <!-- Paso 1: email y contraseña -->
+      <form class="form" data-step="login" novalidate>
+        <h1>Iniciar sesión</h1>
+        <label>Email
+          <input type="email" name="email" autocomplete="username" required maxlength="120">
+        </label>
+        <label>Contraseña
+          <span class="pass">
+            <input type="password" name="password" autocomplete="current-password" required minlength="12" maxlength="128">
+            <button type="button" class="pass__toggle" data-toggle-pass aria-label="Mostrar contraseña">Ver</button>
+          </span>
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Continuar</button>
+        <div class="auth__links">
+          <button type="button" class="link" data-go="signup">Crear mi cuenta (primera vez)</button>
+          <button type="button" class="link" data-go="forgot">Olvidé mi contraseña</button>
+        </div>
+      </form>
+
+      <!-- Alta de cuenta (solo emails autorizados en la base) -->
+      <form class="form" data-step="signup" novalidate hidden>
+        <h1>Crear cuenta</h1>
+        <p class="hint">Solo funciona con un email autorizado por el dueño. Te vamos a enviar un link para confirmarlo.</p>
+        <label>Email
+          <input type="email" name="email" autocomplete="username" required maxlength="120">
+        </label>
+        <label>Contraseña nueva
+          <span class="pass">
+            <input type="password" name="password" autocomplete="new-password" required minlength="12" maxlength="128" data-strength-input>
+            <button type="button" class="pass__toggle" data-toggle-pass aria-label="Mostrar contraseña">Ver</button>
+          </span>
+        </label>
+        <div class="strength" data-strength><span></span></div>
+        <ul class="rules" data-rules>
+          <li data-rule="len">12 caracteres o más</li>
+          <li data-rule="upper">Una mayúscula</li>
+          <li data-rule="lower">Una minúscula</li>
+          <li data-rule="digit">Un número</li>
+          <li data-rule="symbol">Un símbolo</li>
+        </ul>
+        <label>Repetir contraseña
+          <input type="password" name="password2" autocomplete="new-password" required maxlength="128">
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Crear cuenta</button>
+        <button type="button" class="link" data-go="login">Volver</button>
+      </form>
+
+      <!-- Recuperar contraseña -->
+      <form class="form" data-step="forgot" novalidate hidden>
+        <h1>Recuperar acceso</h1>
+        <p class="hint">Te enviamos un link para crear una contraseña nueva. Abrilo en este mismo navegador.</p>
+        <label>Email
+          <input type="email" name="email" autocomplete="username" required maxlength="120">
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Enviar link</button>
+        <button type="button" class="link" data-go="login">Volver</button>
+      </form>
+
+      <!-- Contraseña nueva (después del link de recuperación) -->
+      <form class="form" data-step="newpass" novalidate hidden>
+        <h1>Contraseña nueva</h1>
+        <label>Contraseña nueva
+          <span class="pass">
+            <input type="password" name="password" autocomplete="new-password" required minlength="12" maxlength="128" data-strength-input>
+            <button type="button" class="pass__toggle" data-toggle-pass aria-label="Mostrar contraseña">Ver</button>
+          </span>
+        </label>
+        <div class="strength" data-strength><span></span></div>
+        <label>Repetir contraseña
+          <input type="password" name="password2" autocomplete="new-password" required maxlength="128">
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Guardar contraseña</button>
+      </form>
+
+      <!-- Paso 2a: vincular app autenticadora (primera vez) -->
+      <form class="form" data-step="enroll" novalidate hidden>
+        <h1>Activá el doble factor</h1>
+        <p class="hint">Es obligatorio. Escaneá el código con Google Authenticator, Microsoft Authenticator o Authy y escribí el número de 6 dígitos.</p>
+        <div class="qr"><img data-qr alt="Código QR para la app autenticadora" width="200" height="200"></div>
+        <details class="secret">
+          <summary>No puedo escanear el código</summary>
+          <p>Cargá esta clave a mano en la app: <code data-secret></code></p>
+        </details>
+        <label>Código de 6 dígitos
+          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="otp">
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Verificar y activar</button>
+        <button type="button" class="link" data-logout>Cancelar y salir</button>
+      </form>
+
+      <!-- Paso 2b: código del autenticador -->
+      <form class="form" data-step="mfa" novalidate hidden>
+        <h1>Verificación</h1>
+        <p class="hint">Escribí el código de 6 dígitos de tu app autenticadora.</p>
+        <label>Código
+          <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="otp">
+        </label>
+        <p class="msg" data-msg role="alert"></p>
+        <button class="btn btn--primary" type="submit">Entrar</button>
+        <button type="button" class="link" data-logout>Salir</button>
+      </form>
+
+      <p class="auth__foot">Acceso exclusivo del personal de Solari Motos. Los ingresos quedan registrados.</p>
+    </div>
+  </main>
+
+  <!-- ===== Panel ===== -->
+  <div class="app" data-view="app" hidden>
+    <header class="bar">
+      <img class="bar__logo" src="logo.svg" alt="Solari Motos" width="120" height="46">
+      <nav class="tabs" aria-label="Secciones">
+        <button type="button" data-tab="motos" aria-current="page">Motos</button>
+        <button type="button" data-tab="cascos">Cascos</button>
+        <button type="button" data-tab="promos">Promociones</button>
+        <button type="button" data-tab="sitio">Datos del local</button>
+        <button type="button" data-tab="actividad">Actividad</button>
+      </nav>
+      <div class="bar__end">
+        <a class="link" data-site-link target="_blank" rel="noopener">Ver web</a>
+        <span class="bar__user" data-user></span>
+        <button type="button" class="btn btn--ghost btn--sm" data-logout>Salir</button>
+      </div>
+    </header>
+    <main class="content" data-content aria-live="polite"></main>
+  </div>
+
+  <!-- Editor lateral -->
+  <div class="drawer" data-drawer hidden>
+    <div class="drawer__backdrop" data-close></div>
+    <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <header class="drawer__head">
+        <h2 id="drawer-title" data-drawer-title></h2>
+        <button type="button" class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </header>
+      <div class="drawer__body" data-drawer-body></div>
+      <footer class="drawer__foot" data-drawer-foot></footer>
+    </section>
+  </div>
+
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+  <div class="loading" data-loading><span></span></div>
+
+  <script src="vendor/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
