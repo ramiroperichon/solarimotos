@@ -9,6 +9,7 @@
 }
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html:not(.ok-frame) body { visibility: hidden; }
 body { margin: 0; background: var(--ivory); color: var(--graphite); font-family: var(--f-sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 [hidden] { display: none !important; }
 img { max-width: 100%; display: block; }

@@ -7,6 +7,7 @@
 window.SOLARI_SUPABASE = {
   url: 'https://fscriiqeyobkvujlgmjw.supabase.co',
   clave: 'sb_publishable_6gJyEjk2cKZdei8kNKrsKQ_rg6HcsFH',
-  // Dirección del panel de administración (subdominio)
-  panel: 'https://admin.solarimotos.com.ar/'
+  // Dirección del panel de administración. Hoy: carpeta admin/ del mismo sitio
+  // (GitHub Pages). Con dominio propio: 'https://admin.solarimotos.com.ar/'
+  panel: 'admin/'
 };

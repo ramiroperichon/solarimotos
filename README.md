@@ -90,8 +90,9 @@ Todo se procesa en el navegador: las fotos no se envían a ningún servidor.
 
 ## Panel de administración (`admin/`)
 
-Panel interno para editar motos, cascos, promociones y datos del local. Se publica en el subdominio
-`admin.solarimotos.com.ar` (ver `vercel.json`). En la web pública hay un acceso casi invisible
+Panel interno para editar motos, cascos, promociones y datos del local. Hoy se publica en
+`https://ramiroperichon.github.io/solarimotos/admin/` (GitHub Pages). Con dominio propio se puede pasar al
+subdominio `admin.solarimotos.com.ar` (ver `vercel.json`) cambiando `panel` en `js/config-supabase.js`. En la web pública hay un acceso casi invisible
 (candado en el pie de página).
 
 ### Seguridad
@@ -107,8 +108,8 @@ Panel interno para editar motos, cascos, promociones y datos del local. Se publi
 ### Base de datos (`supabase/`)
 
 - `migrations/001_esquema_seguridad_base.sql` — aplicada.
-- `migrations/002_permisos_en_esquema_privado.sql` — **pendiente**: habilita la lectura pública del catálogo
-  y saca de la API las funciones de permisos. Aplicarla en Supabase → SQL Editor.
+- `migrations/002_permisos_en_esquema_privado.sql` — aplicada: lectura pública del catálogo y funciones de permisos fuera de la API.
+- `migrations/003_admin_lista_fotos.sql` — aplicada: permite al admin borrar fotos del almacenamiento.
 - `seed.sql` — carga inicial del contenido (ya aplicada).
 
 La web pública lee el catálogo de Supabase; si no responde usa la última copia del navegador o `js/data.js`.

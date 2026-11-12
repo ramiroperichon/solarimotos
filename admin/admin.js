@@ -12,6 +12,14 @@
 (function () {
   'use strict';
 
+  // Anti-clickjacking: el panel nunca se muestra dentro de otra página
+  if (window.top !== window.self) {
+    document.documentElement.textContent = '';
+    try { window.top.location.replace(window.self.location.href); } catch (e) { /* bloqueado */ }
+    return;
+  }
+  document.documentElement.classList.add('ok-frame');
+
   const C = window.SOLARI_ADMIN;
   if (!window.supabase || !C) { document.body.textContent = 'No se pudo cargar el panel.'; return; }
 
