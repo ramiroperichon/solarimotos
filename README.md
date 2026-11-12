@@ -110,6 +110,7 @@ subdominio `admin.solarimotos.com.ar` (ver `vercel.json`) cambiando `panel` en `
 - `migrations/001_esquema_seguridad_base.sql` — aplicada.
 - `migrations/002_permisos_en_esquema_privado.sql` — aplicada: lectura pública del catálogo y funciones de permisos fuera de la API.
 - `migrations/003_admin_lista_fotos.sql` — aplicada: permite al admin borrar fotos del almacenamiento.
+- `migrations/004_clientes_cuotas.sql` — aplicada: clientes, planes de financiación, cuotas y mensajes de cobranza.
 - `seed.sql` — carga inicial del contenido (ya aplicada).
 
 La web pública lee el catálogo de Supabase; si no responde usa la última copia del navegador o `js/data.js`.
@@ -124,3 +125,24 @@ insert into privado.emails_autorizados (email, nombre) values ('email@ejemplo.co
 
 Después esa persona entra al panel, toca "Crear mi cuenta" y activa su doble factor.
 Para quitarle el acceso: `update privado.admins set activo = false where email = 'email@ejemplo.com';`
+
+## Clientes y cuotas (pestaña "Clientes" del panel)
+
+- **Clientes**: nombre, DNI, WhatsApp (se escribe con código de área, sin 0 ni 15; el panel muestra cómo queda), email, dirección y notas internas.
+- **Planes**: moto del catálogo o descripción libre, precio, entrega, cantidad de cuotas, monto y fecha de la primera cuota. Las cuotas mensuales se generan solas.
+  "Calcular sin interés" divide (precio − entrega) por la cantidad de cuotas; si hay interés, se escribe el monto a mano.
+- **Cuotas**: registrar pago (monto, fecha, medio, nota; acepta pagos parciales), anular un pago o editar vencimiento y monto.
+  Un plan sin pagos se puede eliminar; con pagos solo se puede cancelar.
+- **Estados** (hora argentina): vencida, por vencer (dentro de los días de aviso, 5 por defecto), al día, plan terminado o sin plan.
+  La pestaña muestra en rojo cuántos clientes tienen cuotas vencidas.
+- **Resumen**: clientes atrasados y monto, cuotas por vencer, cobrado en el mes y lo que falta cobrar en el mes.
+- **Filtros**: búsqueda por nombre, DNI, teléfono o moto; estado; moto; orden (más atrasados, próximo vencimiento, mayor deuda, avisados hace más tiempo, nombre); "ocultar avisados hoy".
+- **WhatsApp**: botón por cliente con el mensaje ya escrito (recordatorio o cuota vencida) y comprobante de pago.
+  Con varios seleccionados, "Enviar recordatorios" los recorre en cola: se abre cada conversación, se envía y se vuelve para seguir con el próximo.
+  WhatsApp no permite envíos masivos automáticos desde un link; para eso hace falta la API de WhatsApp Business (paga).
+  Cada aviso queda registrado ("Avisado hoy").
+- **Mensajes**: editables en "Mensajes", con variables `{nombre} {moto} {cuota} {total} {vencimiento} {monto} {vencidas} {adeudado} {restantes} {pagado} {fecha_pago}`.
+- **Exportar**: descarga la lista filtrada como CSV para Excel.
+
+**Privacidad**: estos datos personales solo los lee y modifica un administrador con doble factor (RLS AAL2). No llegan a la web pública ni
+se guardan en el navegador, y cada cambio queda en la Actividad. Al guardar datos de clientes rige la Ley 25.326 de Protección de Datos Personales.

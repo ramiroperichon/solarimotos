@@ -137,7 +137,8 @@
     <header class="bar">
       <img class="bar__logo" src="logo.svg" alt="Solari Motos" width="120" height="46">
       <nav class="tabs" aria-label="Secciones">
-        <button type="button" data-tab="motos" aria-current="page">Motos</button>
+        <button type="button" data-tab="clientes" aria-current="page">Clientes</button>
+        <button type="button" data-tab="motos">Motos</button>
         <button type="button" data-tab="cascos">Cascos</button>
         <button type="button" data-tab="promos">Promociones</button>
         <button type="button" data-tab="sitio">Datos del local</button>
@@ -155,7 +156,7 @@
   <!-- Editor lateral -->
   <div class="drawer" data-drawer hidden>
     <div class="drawer__backdrop" data-close></div>
-    <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <section class="drawer__panel" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       <header class="drawer__head">
         <h2 id="drawer-title" data-drawer-title></h2>
         <button type="button" class="icon-btn" data-close aria-label="Cerrar">✕</button>
@@ -170,6 +171,7 @@
 
   <script src="vendor/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"></script>
   <script src="config.js"></script>
+  <script src="clientes.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

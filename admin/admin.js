@@ -283,20 +283,24 @@
   /* ======================================================================
      PANEL
      ====================================================================== */
-  let tab = 'motos';
+  let tab = 'clientes';
+  let modClientes = null;
+  const clientes = () => (modClientes = modClientes || window.SolariModulos.clientes({ sb, $, $$, esc, toast, loading, explicar, abrirEditor, cerrarEditor, campo, area, selector, boton, leerForm }));
   function entrar(perfil) {
     showView('app');
     $('[data-user]').textContent = perfil.email || '';
     $('[data-site-link]').href = sitioBase;
     reiniciarInactividad();
     abrir(tab);
+    if (tab !== 'clientes') clientes().precargar();
   }
 
   $$('[data-tab]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.tab)));
   function abrir(t) {
     tab = t;
     $$('[data-tab]').forEach((b) => (b.dataset.tab === t ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current')));
-    ({ motos: verMotos, cascos: verCascos, promos: verPromos, sitio: verSitio, actividad: verActividad })[t]();
+    if (t !== 'clientes') document.body.classList.remove('con-bulk');
+    ({ clientes: () => clientes().ver(), motos: verMotos, cascos: verCascos, promos: verPromos, sitio: verSitio, actividad: verActividad })[t]();
   }
 
   async function traer(tabla) {
@@ -661,16 +665,28 @@
   /* ======================== ACTIVIDAD ======================== */
   async function verActividad() {
     loading(true);
-    const { data, error } = await sb.from('auditoria').select('tabla,registro,accion,email,fecha').order('fecha', { ascending: false }).limit(80);
+    const { data, error } = await sb.from('auditoria').select('tabla,registro,accion,email,fecha,nombre:despues->>nombre,nombreAntes:antes->>nombre,numero:despues->>numero,vehiculo:despues->>vehiculo,pagadoAntes:antes->>pagado,pagado:despues->>pagado,avisoAntes:antes->>ultimo_aviso,aviso:despues->>ultimo_aviso').order('fecha', { ascending: false }).limit(80);
     loading(false);
     const c = $('[data-content]');
     if (error) { c.innerHTML = '<p class="hint">No se pudo leer la actividad.</p>'; return; }
     const ACC = { INSERT: 'creó', UPDATE: 'modificó', DELETE: 'eliminó' };
-    const TAB = { motos: 'la moto', cascos: 'el casco', promociones: 'la promoción', sitio: 'los datos del local' };
+    const TAB = { motos: 'la moto', cascos: 'el casco', promociones: 'la promoción', sitio: 'los datos del local', clientes: 'el cliente', planes: 'el plan', cuotas: 'la cuota', cobranza: 'los mensajes de cobranza' };
+    const detalle = (r) => {
+      if (r.tabla === 'sitio' || r.tabla === 'cobranza') return '';
+      if (r.tabla === 'clientes') return r.nombre || r.nombreAntes || '';
+      if (r.tabla === 'planes') return r.vehiculo || '';
+      if (r.tabla === 'cuotas') {
+        if (r.aviso && r.aviso !== r.avisoAntes) return `N.º ${r.numero} (aviso por WhatsApp)`;
+        if (Number(r.pagado) > Number(r.pagadoAntes)) return `N.º ${r.numero} (pago registrado)`;
+        if (Number(r.pagado) < Number(r.pagadoAntes)) return `N.º ${r.numero} (pago anulado)`;
+        return `N.º ${r.numero || ''}`;
+      }
+      return r.registro;
+    };
     c.innerHTML = `<div class="head"><h1>Actividad</h1></div>
       <p class="hint">Registro automático de cambios. No se puede editar ni borrar.</p>
       <div class="log">${data.map((r) => `
-        <div class="log__row"><b>${esc(r.email || 'Sistema')}</b> ${esc(ACC[r.accion] || r.accion)} ${esc(TAB[r.tabla] || r.tabla)} <b>${esc(r.tabla === 'sitio' ? '' : r.registro)}</b>
+        <div class="log__row"><b>${esc(r.email || 'Sistema')}</b> ${esc(ACC[r.accion] || r.accion)} ${esc(TAB[r.tabla] || r.tabla)} <b>${esc(detalle(r))}</b>
           <small>${esc(new Date(r.fecha).toLocaleString('es-AR'))}</small></div>`).join('') || '<p class="hint">Sin actividad todavía.</p>'}</div>`;
   }
 
@@ -699,7 +715,7 @@
 
   /* Drawer */
   let ultimoFoco = null;
-  function abrirEditor(titulo, html, botones) {
+  function abrirEditor(titulo, html, botones, opts = {}) {
     ultimoFoco = document.activeElement;
     const dr = $('[data-drawer]');
     $('[data-drawer-title]').textContent = titulo;
@@ -716,7 +732,8 @@
     });
     dr.hidden = false;
     document.body.style.overflow = 'hidden';
-    setTimeout(() => { const i = $('input:not([readonly])', dr); if (i) i.focus(); }, 60);
+    if (opts.sinFoco) { $('[data-drawer-body]').scrollTop = 0; setTimeout(() => $('.drawer__panel', dr).focus(), 60); }
+    else setTimeout(() => { const i = $('input:not([readonly])', dr); if (i) i.focus(); }, 60);
   }
   function cerrarEditor() {
     const dr = $('[data-drawer]');
