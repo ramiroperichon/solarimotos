@@ -111,6 +111,8 @@ subdominio `admin.solarimotos.com.ar` (ver `vercel.json`) cambiando `panel` en `
 - `migrations/002_permisos_en_esquema_privado.sql` — aplicada: lectura pública del catálogo y funciones de permisos fuera de la API.
 - `migrations/003_admin_lista_fotos.sql` — aplicada: permite al admin borrar fotos del almacenamiento.
 - `migrations/004_clientes_cuotas.sql` — aplicada: clientes, planes de financiación, cuotas y mensajes de cobranza.
+- `migrations/005_recibos.sql` — aplicada: número de recibo correlativo y monto de cada pago.
+- `borrar-clientes-prueba.sql` — borra los 10 clientes de prueba.
 - `seed.sql` — carga inicial del contenido (ya aplicada).
 
 La web pública lee el catálogo de Supabase; si no responde usa la última copia del navegador o `js/data.js`.
@@ -143,6 +145,14 @@ Para quitarle el acceso: `update privado.admins set activo = false where email =
   Cada aviso queda registrado ("Avisado hoy").
 - **Mensajes**: editables en "Mensajes", con variables `{nombre} {moto} {cuota} {total} {vencimiento} {monto} {vencidas} {adeudado} {restantes} {pagado} {fecha_pago}`.
 - **Exportar**: descarga la lista filtrada como CSV para Excel.
+- **Recibo en PDF** (A5, `admin/recibo.js` + jsPDF incluido en `admin/vendor/`): cada pago recibe un número correlativo `0001-00000001`
+  que asigna la base (no se puede cambiar a mano). Incluye logo, datos del local, cliente y DNI, importe en números y letras,
+  cuota, medio de pago, estado del plan y línea de firma. Aclara "Documento no válido como factura".
+  - "Pagó $X (transf.)" registra la cuota completa por transferencia con fecha de hoy en un toque.
+  - "Enviar recibo": en el celular abre el menú Compartir con el PDF adjunto (elegir WhatsApp y el contacto);
+    en la computadora descarga el PDF y abre el chat para adjuntarlo con el clip.
+  - "PDF" descarga el recibo listo para imprimir (abre la ventana de impresión al abrirlo).
+  - Si una cuota se paga en partes, cada pago tiene su recibo; desde el panel se reimprime el último.
 
 **Privacidad**: estos datos personales solo los lee y modifica un administrador con doble factor (RLS AAL2). No llegan a la web pública ni
 se guardan en el navegador, y cada cambio queda en la Actividad. Al guardar datos de clientes rige la Ley 25.326 de Protección de Datos Personales.

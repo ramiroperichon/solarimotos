@@ -29,11 +29,11 @@
       todos: 'Todos', vencida: 'Con cuotas vencidas', por_vencer: 'Por vencer', al_dia: 'Al día', finalizado: 'Plan terminado', sin_plan: 'Sin plan'
     };
     const BADGE = { vencida: 'badge--off', por_vencer: 'badge--warn', al_dia: 'badge--ok', finalizado: '', sin_plan: '' };
-    const VARIABLES = '{nombre} {moto} {cuota} {total} {vencimiento} {monto} {vencidas} {adeudado} {restantes} {pagado} {fecha_pago}';
+    const VARIABLES = '{nombre} {moto} {cuota} {total} {vencimiento} {monto} {vencidas} {adeudado} {restantes} {pagado} {fecha_pago} {recibo}';
     const PLANTILLAS = {
       recordatorio: 'Hola {nombre}! Te escribimos de Solari Motos para recordarte que la cuota {cuota} de {total} de tu {moto} vence el {vencimiento} ({monto}). Podés acercarte al local o consultarnos por transferencia. Gracias por estar al día. Saludos!',
       vencida: 'Hola {nombre}, ¿cómo estás? Te escribimos de Solari Motos porque la cuota {cuota} de {total} de tu {moto} venció el {vencimiento}. Tenés {vencidas} cuota(s) pendiente(s) por {adeudado}. Cuando puedas acercate al local o avisanos si necesitás coordinar. Saludos!',
-      pago: 'Hola {nombre}! Registramos tu pago de {pagado} correspondiente a la cuota {cuota} de {total} de tu {moto} ({fecha_pago}). Te quedan {restantes} cuota(s). Muchas gracias! Solari Motos.'
+      pago: 'Hola {nombre}! Registramos tu pago de {pagado} correspondiente a la cuota {cuota} de {total} de tu {moto} ({fecha_pago}). Te enviamos el recibo N.º {recibo}. Te quedan {restantes} cuota(s). Muchas gracias! Solari Motos.'
     };
 
     /* Teléfono argentino → número de WhatsApp (549 + área + número, sin 0 ni 15) */
@@ -73,14 +73,17 @@
     async function cargar() {
       loading(true);
       try {
-        const [clientes, planes, cuotas, motos, cfg] = await Promise.all([
+        const [clientes, planes, cuotas, motos, cfg, sitio] = await Promise.all([
           todo('clientes', 'nombre'), todo('planes', 'creado'), todo('cuotas', 'numero'),
           sb.from('motos').select('id,marca,modelo,precio').order('orden'),
-          sb.from('cobranza').select('dias_aviso,plantillas').eq('id', 1).maybeSingle()
+          sb.from('cobranza').select('dias_aviso,plantillas').eq('id', 1).maybeSingle(),
+          sb.from('sitio').select('config').eq('id', 1).maybeSingle()
         ]);
         if (motos.error) throw motos.error;
         Object.assign(st, { clientes, planes, cuotas, motos: motos.data || [], cargado: true });
         if (cfg.data) st.cfg = cfg.data;
+        const sc = (sitio.data && sitio.data.config) || {};
+        st.negocio = { nombre: 'Solari Motos', direccion: sc.direccion || '', localidad: sc.localidad || '', provincia: sc.provincia || '', whatsapp: sc.whatsappVisible || sc.whatsapp || '' };
         calcular();
         return true;
       } catch (e) {
@@ -166,7 +169,8 @@
         cuota: c ? c.numero : '', total: p ? p.cantidad_cuotas : '',
         vencimiento: c ? fFecha(c.vencimiento) : '', monto: c ? $m(c.saldo || c.monto) : '',
         vencidas: cli.vencidas.length, adeudado: $m(cli.adeudado),
-        restantes: p ? p.debe : '', pagado: c ? $m(c.pagado) : '', fecha_pago: c ? fFecha(c.fecha_pago) : ''
+        restantes: p ? p.debe : '', pagado: c ? $m(c.ultimo_pago || c.pagado) : '', fecha_pago: c ? fFecha(c.fecha_pago) : '',
+        recibo: c && c.recibo_numero ? window.SolariRecibo.numero(c.recibo_numero) : ''
       };
       return tpl.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
     }
@@ -481,8 +485,9 @@
             ${cli.telefono ? '<button type="button" class="btn btn--ghost btn--sm" data-f-chat>Abrir chat</button>' : ''}
             <button type="button" class="btn btn--ghost btn--sm" data-f-edit>Editar datos</button>
           </div>
-          ${pagoRec ? `<div class="aviso-ok">Pago registrado: cuota ${pagoRec.numero} por ${esc($m(pagoRec.pagado))}.
-            ${cli.telefono ? '<button type="button" class="btn btn--wa btn--sm" data-f-recibo>Enviar comprobante por WhatsApp</button>' : ''}</div>` : ''}
+          ${pagoRec ? `<div class="aviso-ok"><span>Pago registrado: cuota ${pagoRec.numero} por ${esc($m(pagoRec.ultimo_pago || pagoRec.pagado))}${pagoRec.recibo_numero ? ` · recibo ${esc(window.SolariRecibo.numero(pagoRec.recibo_numero))}` : ''}.</span>
+            <span class="aviso-ok__btns">${cli.telefono ? '<button type="button" class="btn btn--wa btn--sm" data-f-recibo>Enviar recibo PDF por WhatsApp</button>' : ''}
+            <button type="button" class="btn btn--ghost btn--sm" data-f-pdf>Descargar / imprimir PDF</button></span></div>` : ''}
         </div>
         <div class="head"><h3>Planes de cuotas</h3><button type="button" class="btn btn--primary btn--sm" data-f-plan>+ Nuevo plan</button></div>
         ${cli.planes.length ? cli.planes.map(planHTML).join('') : '<p class="hint">Sin planes. Creá uno con "+ Nuevo plan": las cuotas se generan solas, una por mes.</p>'}`,
@@ -510,14 +515,14 @@
       on('[data-f-chat]', () => abrirWA(cli.telefono, `Hola ${primerNombre(cli.nombre)}! `));
       on('[data-f-edit]', () => editarCliente(cli));
       on('[data-f-plan]', () => nuevoPlan(cli));
-      on('[data-f-recibo]', () => { abrirWA(cli.telefono, mensaje(cli, 'pago', pagoRec)); st.ultimoPago = null; ficha(id); });
+      on('[data-f-recibo]', () => enviarRecibo(cli, pagoRec));
+      on('[data-f-pdf]', () => pdfRecibo(pagoRec));
       $$('[data-c-pagar]', body).forEach((b) => b.addEventListener('click', () => formCuota(b.dataset.cPagar, 'pagar')));
       $$('[data-c-editar]', body).forEach((b) => b.addEventListener('click', () => formCuota(b.dataset.cEditar, 'editar')));
       $$('[data-c-anular]', body).forEach((b) => b.addEventListener('click', () => anularPago(b.dataset.cAnular)));
-      $$('[data-c-recibo]', body).forEach((b) => b.addEventListener('click', () => {
-        const c = st.cuotas.find((x) => x.id === b.dataset.cRecibo);
-        abrirWA(cli.telefono, mensaje(cli, 'pago', c));
-      }));
+      $$('[data-c-recibo]', body).forEach((b) => b.addEventListener('click', () => enviarRecibo(cli, st.cuotas.find((x) => x.id === b.dataset.cRecibo))));
+      $$('[data-c-pdf]', body).forEach((b) => b.addEventListener('click', () => pdfRecibo(st.cuotas.find((x) => x.id === b.dataset.cPdf))));
+      $$('[data-c-rapido]', body).forEach((b) => b.addEventListener('click', () => pagoRapido(b.dataset.cRapido)));
       $$('[data-p-estado]', body).forEach((b) => b.addEventListener('click', () => estadoPlan(b.dataset.pEstado)));
       $$('[data-p-borrar]', body).forEach((b) => b.addEventListener('click', () => borrarPlan(b.dataset.pBorrar)));
       $$('[data-p-mas]', body).forEach((b) => b.addEventListener('click', () => {
@@ -565,9 +570,11 @@
               : c.parcial ? `Pagó ${esc($m(c.pagado))} · falta ${esc($m(c.saldo))}` : ''}${c.ultimo_aviso ? ` · avisado ${esc(hace(diaAR(new Date(c.ultimo_aviso))))}` : ''}${c.nota ? ` · ${esc(c.nota)}` : ''}</small></span>
           <span class="badge ${T[1]}">${esc(T[0])}${c.parcial ? ' · parcial' : ''}</span>
           <span class="cuota__btns">
-            ${c.estado === 'pagada'
-              ? `<button type="button" class="mini" data-c-recibo="${esc(c.id)}" title="Enviar comprobante por WhatsApp">Comprobante</button><button type="button" class="mini" data-c-anular="${esc(c.id)}">Anular</button>`
-              : `<button type="button" class="mini mini--ok" data-c-pagar="${esc(c.id)}">Registrar pago</button><button type="button" class="mini" data-c-editar="${esc(c.id)}">Editar</button>`}
+            ${c.estado !== 'pagada' ? `<button type="button" class="mini mini--ok" data-c-rapido="${esc(c.id)}" title="Registra el pago completo por transferencia con fecha de hoy">Pagó ${esc($m(c.saldo))} (transf.)</button>
+              <button type="button" class="mini" data-c-pagar="${esc(c.id)}">Otro monto / medio</button><button type="button" class="mini" data-c-editar="${esc(c.id)}">Editar</button>` : ''}
+            ${c.recibo_numero ? `<button type="button" class="mini mini--wa" data-c-recibo="${esc(c.id)}" title="Enviar el recibo en PDF por WhatsApp">Enviar recibo</button>
+              <button type="button" class="mini" data-c-pdf="${esc(c.id)}" title="Descargar o imprimir el recibo">PDF</button>` : ''}
+            ${Number(c.pagado) > 0 ? `<button type="button" class="mini" data-c-anular="${esc(c.id)}">Anular pago</button>` : ''}
           </span>
         </div>`;
     }
@@ -607,7 +614,7 @@
           if (!(monto > 0)) { toast('Revisá el monto.', true); return; }
           if (monto > c.saldo && !window.confirm(`El monto supera lo que falta pagar (${$m(c.saldo)}). ¿Registrarlo igual?`)) return;
           if (!/^\d{4}-\d{2}-\d{2}$/.test(v.fecha)) { toast('Revisá la fecha.', true); return; }
-          cambio = { pagado: Number(c.pagado) + monto, fecha_pago: v.fecha, medio_pago: v.medio, nota: v.nota };
+          cambio = { pagado: Number(c.pagado) + monto, fecha_pago: v.fecha, medio_pago: v.medio, nota: v.nota || c.nota };
         } else {
           if (!(monto > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(v.vencimiento)) { toast('Revisá la fecha y el monto.', true); return; }
           cambio = { vencimiento: v.vencimiento, monto, nota: v.nota };
@@ -624,6 +631,42 @@
         await cargar();
         ficha(cli);
       });
+    }
+
+    /* ---------- Recibos ---------- */
+    function datosRecibo(c) {
+      const p = st.planes.find((x) => x.id === c.plan_id);
+      const cli = st.clientes.find((x) => x.id === p.cliente_id);
+      return { negocio: st.negocio, cliente: cli, plan: p, cuota: c };
+    }
+    function pdfRecibo(c) {
+      if (!c || !c.recibo_numero) { toast('Esta cuota no tiene recibo.', true); return; }
+      try { window.SolariRecibo.descargar(datosRecibo(c), true); toast('Recibo descargado: abrilo para imprimir.'); }
+      catch (e) { toast('No se pudo generar el PDF.', true); }
+    }
+    function enviarRecibo(cli, c) {
+      if (!c || !c.recibo_numero) { toast('Esta cuota no tiene recibo.', true); return; }
+      let r;
+      try { r = window.SolariRecibo.enviar(datosRecibo(c), cli.telefono, mensaje(cli, 'pago', c)); }
+      catch (e) { toast('No se pudo generar el PDF.', true); return; }
+      r.then((res) => {
+        if (res === 'descargado') toast('Se descargó el PDF y se abrió el chat: adjuntalo con el clip.');
+        else if (res === 'compartido') toast('Recibo compartido.');
+        if (res !== 'cancelado' && st.ultimoPago === c.id) { st.ultimoPago = null; ficha(cli.id); }
+      });
+    }
+    async function pagoRapido(id) {
+      const c = st.cuotas.find((x) => x.id === id);
+      if (!window.confirm(`¿Registrar el pago de la cuota ${c.numero} por ${$m(c.saldo)} (transferencia, con fecha de hoy)?`)) return;
+      loading(true);
+      const { data, error } = await sb.from('cuotas').update({ pagado: Number(c.pagado) + c.saldo, fecha_pago: hoyISO(), medio_pago: 'transferencia' }).eq('id', id).select('id');
+      loading(false);
+      if (error || !data || !data.length) { toast(error ? explicar(error) : 'Sin permiso para guardar.', true); return; }
+      toast('Pago registrado.');
+      st.ultimoPago = id;
+      const cli = ficha.abierta;
+      await cargar();
+      ficha(cli);
     }
 
     async function anularPago(id) {
@@ -748,7 +791,7 @@
           <p class="hint">Podés usar estas palabras entre llaves y se reemplazan solas: <code>${esc(VARIABLES)}</code></p>
           ${area('Recordatorio (cuota por vencer o próxima)', 'recordatorio', pl.recordatorio, 1000)}
           ${area('Cuota vencida', 'vencida', pl.vencida, 1000)}
-          ${area('Comprobante de pago', 'pago', pl.pago, 1000)}
+          ${area('Recibo de pago (acompaña al PDF)', 'pago', pl.pago, 1000)}
           <button type="button" class="link" data-restaurar>Volver a los mensajes originales</button>
         </form>`,
       [

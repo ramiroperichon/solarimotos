@@ -157,7 +157,7 @@ legend { padding: 0 6px; font-family: var(--f-display); font-size: .9rem; text-t
 .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .kpi { display: grid; gap: 2px; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--white); }
 .kpi span { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.kpi b { font-family: var(--f-display); font-weight: 400; font-size: 1.35rem; line-height: 1.2; overflow-wrap: anywhere; }
+.kpi b { font-family: var(--f-display); font-weight: 400; font-size: clamp(1rem, 4.4vw, 1.35rem); line-height: 1.2; white-space: nowrap; }
 .kpi small { font-size: .8rem; color: var(--muted); }
 button.kpi { cursor: pointer; }
 .kpi--danger { border-color: rgba(179,38,30,.35); }
@@ -236,3 +236,6 @@ body.con-bulk .content { padding-bottom: 150px; }
 
 .drawer__body > form[data-form] { display: grid; gap: 14px; }
 .btn--quiet { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1px rgba(179,38,30,.35); }
+.mini--wa { background: var(--wa) !important; color: #fff; }
+.aviso-ok { justify-content: space-between; }
+.aviso-ok__btns { display: flex; flex-wrap: wrap; gap: 6px; }
